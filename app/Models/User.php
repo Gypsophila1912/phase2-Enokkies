@@ -45,4 +45,15 @@ class User extends Authenticatable
             'password' => 'hashed',
         ];
     }
+
+    public function groups()
+    {
+        return $this->belongsToMany(Group::class, 'groups_users')
+                    ->withTimestamps();
+    }
+
+    public function tasks()
+    {
+        return $this->hasMany(Task::class);
+    }
 }
