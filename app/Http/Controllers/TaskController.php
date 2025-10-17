@@ -1,9 +1,14 @@
 <?php
 
-namespace App\Models;
+namespace App\Http\Controllers;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Support\Carbon;
+use Illuminate\Database\Eloquent\Casts\Attribute;
+
 
 class Task extends Model
 {
@@ -20,22 +25,15 @@ class Task extends Model
 
     protected $dates = ['completed_at'];
 
-    // ✅ タスク完了状態を切り替える
-    public function toggleComplete()
+    //グループ
+    public function group()
     {
-        $this->update([
-            'completed_at' => $this->completed_at ? null : now(),
-        ]);
-    }
-
-    // ✅ リレーション
+        return $this->belongsTo(Group::class);     
+}
+    //ユーザー
     public function user()
     {
         return $this->belongsTo(User::class);
     }
-
-    public function group()
-    {
-        return $this->belongsTo(Group::class);
-    }
 }
+
