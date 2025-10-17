@@ -45,4 +45,14 @@ class User extends Authenticatable
             'password' => 'hashed',
         ];
     }
+
+
+    /**
+     * 所属グループとの関係（1人のユーザーは1つのグループに所属）
+     */
+    public function group()
+    {
+        return $this->belongsTo(Groups::class, 'group_id');
+    }
+
 }
