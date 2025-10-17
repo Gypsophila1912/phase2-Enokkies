@@ -31,6 +31,7 @@ Route::middleware('auth')->group(function () {
     Route::get('/groups/{id}', [GroupController::class, 'show'])->name('groups.show');    
     Route::post('/groups', [GroupController::class, 'store'])->name('groups.store');
     Route::post('/groups/{id}/join', [GroupController::class, 'join'])->name('groups.join');
+    Route::post('/groups/{group}/join', [GroupController::class, 'join'])->name('groups.join');
     Route::get('/group-select', [GroupController::class, 'select'])->name('groups.select');
     Route::get('/group-create', [GroupController::class, 'create'])->name('groups.create');
     Route::delete('/groups/{id}', [GroupController::class, 'destroy'])->name('groups.destroy');
