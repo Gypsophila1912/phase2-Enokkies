@@ -46,14 +46,29 @@ class User extends Authenticatable
         ];
     }
 
-    public function groups()
-    {
-        return $this->belongsToMany(Group::class, 'groups_users')
-                    ->withTimestamps();
-    }
 
+    /**
+     * 所属グループとの関係（1人のユーザーは1つのグループに所属）
+     */
+    public function group()
+    {
+        return $this->belongsTo(Group::class, 'group_id');
+    }
+    
     public function tasks()
     {
         return $this->hasMany(Task::class);
+    }
+
+    // 自分が所属する DevGroupUser レコードとの関係
+    public function devGroupUsers()
+    {
+        return $this->hasMany(DevGroupUser::class);
+    }
+
+    // 所属しているグループ一覧を取得
+    public function devGroups()
+    {
+        return $this->belongsToMany(DevGroup::class, 'devgroup_user', 'user_id', 'devgroup_id');
     }
 }
