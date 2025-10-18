@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use App\Models\User;
+use App\Models\Character;
 
 class Group extends Model
 {
@@ -23,5 +24,10 @@ class Group extends Model
     public function members()
     {
         return $this->belongsToMany(User::class);
+    }
+
+    public function character()
+    {
+        return $this->hasOne(Character::class, 'group_id');
     }
 }

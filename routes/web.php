@@ -10,6 +10,8 @@ use App\Http\Controllers\TaskController;
 
 use App\Http\Controllers\GroupController;
 use App\Http\Controllers\UserController;
+use App\Http\Controllers\EnokkiController; // ← 追加
+use App\Http\Controllers\TaskController;    // ← 追加
 
 
 Route::get('/', function () {
@@ -21,23 +23,19 @@ Route::get('/', function () {
     ]);
 });
 
-
-
 Route::get('/dashboard', function () {
     return redirect()->route('groups.select');
 })->middleware(['auth', 'verified'])->name('dashboard');
-
 
 Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 
+
     //task
     Route::resource('tasks', TaskController::class);
     Route::patch('/tasks/{task}/toggle', [TaskController::class, 'toggle'])->name('tasks.toggle');
-
-
     Route::get('/developer', [DeveloperController::class, 'index'])->name('developer.index');
     Route::post('/developer/create', [DeveloperController::class, 'create'])->name('developer.create');
     Route::get('/developer/group/{id}', [DeveloperController::class, 'show'])->name('developer.show');
@@ -45,11 +43,22 @@ Route::middleware('auth')->group(function () {
     Route::get('/groups/{id}', [GroupController::class, 'show'])->name('groups.show');    
     Route::post('/groups', [GroupController::class, 'store'])->name('groups.store');
     Route::post('/groups/{id}/join', [GroupController::class, 'join'])->name('groups.join');
-    Route::post('/groups/{group}/join', [GroupController::class, 'join'])->name('groups.join');
     Route::get('/group-select', [GroupController::class, 'select'])->name('groups.select');
     Route::get('/group-create', [GroupController::class, 'create'])->name('groups.create');
     Route::delete('/groups/{id}', [GroupController::class, 'destroy'])->name('groups.destroy');
     Route::delete('/account', [UserController::class, 'destroy'])->name('account.destroy');
+
+
+    // 🆕 Enokki育成画面のルートを追加
+    Route::get('/enokki', [EnokkiController::class, 'show'])->name('enokki.show');
+
+    // 🆕 タスク完了処理のルートを追加
+    Route::patch('/tasks/{task}/complete', [TaskController::class, 'complete'])->name('tasks.complete');
+
+    // 🆕 キャラ設定画面への仮ルート（他メンバーが作成予定）
+    Route::get('/character/settings', function () {
+        return Inertia::render('Character/Settings');
+    })->name('character.settings');
 
 });
 

@@ -19,6 +19,10 @@ export default function GroupSelect() {
         }
     };
 
+    const handleJoin = (groupId) => {
+        router.post('/groups/join', { group_id: groupId });
+    };
+
     return (
         <AppLayout>
             <div className="min-h-screen bg-gradient-to-br from-lime-200 via-green-100 to-green-300 px-4 py-10 font-sans text-gray-800 relative overflow-hidden">
@@ -29,7 +33,7 @@ export default function GroupSelect() {
                         key={i}
                         className="absolute sparkle"
                         style={{
-                            top: `${Math.random() * 70}%`, // ← 下部に出ないように調整
+                            top: `${Math.random() * 70}%`,
                             left: `${Math.random() * 100}%`,
                             animationDelay: `${Math.random() * 2}s`,
                         }}
@@ -55,6 +59,7 @@ export default function GroupSelect() {
                                     >
                                         詳細を見る
                                     </Link>
+                                    
                                     <button
                                         onClick={() => handleDelete(group)}
                                         className="bg-red-500 hover:bg-red-600 text-white font-semibold px-4 py-2 rounded-full shadow transition duration-300"
