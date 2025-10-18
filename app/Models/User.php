@@ -46,11 +46,15 @@ class User extends Authenticatable
         ];
     }
 
-    public function groups()
+
+    /**
+     * 所属グループとの関係（1人のユーザーは1つのグループに所属）
+     */
+    public function group()
     {
-        return $this->belongsToMany(Group::class, 'groups_users')
-                    ->withTimestamps();
+        return $this->belongsTo(Group::class, 'group_id');
     }
+
 
     public function tasks()
     {
