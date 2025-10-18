@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Task;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 
 class TaskController extends Controller
 {
@@ -40,10 +41,29 @@ class TaskController extends Controller
     //  タスク完了／未完了トグル
     public function toggleComplete(Task $task)
     {
+        // 現在の完了状態を判定
+        $wasCompleted = (bool) $task->completed_at;
 
-        $task->update([
-            'completed_at' => $task->completed_at ? null : now(),
-        ]);
+        DB::transaction(function () use ($task, $wasCompleted) {
+            if ($wasCompleted) {
+                // 未完了に戻す（ポイントは戻さない仕様）
+                $task->update(['completed_at' => null]);
+            } else {
+                // 完了にする
+                $task->update(['completed_at' => now()]);
+
+                // タスク所有ユーザーにポイントを付与（+1）
+                if ($task->user_id) {
+                    $user = $task->user()->lockForUpdate()->first();
+                    if ($user) {
+                        $user->increment('points', 1);
+                    }
+                }
+            }
+        });
+
+        // 最新の関連を読み直して返す
+        $task->load('user');
 
         return response()->json($task);
     }
