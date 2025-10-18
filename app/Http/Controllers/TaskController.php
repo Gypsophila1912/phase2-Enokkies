@@ -2,38 +2,58 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\Relations\HasMany;
-use Illuminate\Support\Carbon;
-use Illuminate\Database\Eloquent\Casts\Attribute;
+use App\Models\Task;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
-
-class Task extends Model
+class TaskController extends Controller
 {
-    use HasFactory;
-
-    protected $fillable = [
-        'group_id',
-        'user_id',
-        'title',
-        'description',
-        'completed_at',
-        'points',
-    ];
-
-    protected $dates = ['completed_at'];
-
-    //グループ
-    public function group()
+    // 一覧取得
+    public function index(Request $request)
     {
-        return $this->belongsTo(Group::class);     
-}
-    //ユーザー
-    public function user()
+        $groupId = $request->query('group_id');
+        $tasks = Task::where('group_id', $groupId)
+            ->with('user')
+            ->orderBy('created_at', 'desc')
+            ->get();
+
+        return response()->json($tasks);
+    }
+
+    //  タスク作成
+    public function store(Request $request)
     {
-        return $this->belongsTo(User::class);
+        $validated = $request->validate([
+            'group_id' => 'required|integer|exists:groups,id',
+            'title' => 'required|string|max:255',
+            'description' => 'nullable|string',
+            'points' => 'nullable|integer',
+        ]);
+
+        $validated['user_id'] = Auth::id(); // ログイン中ユーザー
+
+        $task = Task::create($validated);
+
+        return response()->json($task, 201);
+    }
+
+    //  タスク完了／未完了トグル
+    public function toggleComplete(Task $task)
+    {
+
+        $task->update([
+            'completed_at' => $task->completed_at ? null : now(),
+        ]);
+
+        return response()->json($task);
+    }
+
+    //  タスク削除
+    public function destroy(Task $task)
+    {
+
+        $task->delete();
+
+        return response()->json(['message' => 'Deleted successfully'], 204);
     }
 }
-
