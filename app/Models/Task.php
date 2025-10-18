@@ -13,12 +13,14 @@ class Task extends Model
         'group_id',
         'user_id',
         'title',
-        'description',
-        'completed_at',
+        'description', 
         'points',
+        'due_date',
+        'completed_at',
     ];
 
     protected $casts = [
+        'due_date' => 'datetime',
         'completed_at' => 'datetime',
     ];
 
