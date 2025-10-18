@@ -54,10 +54,21 @@ class User extends Authenticatable
     {
         return $this->belongsTo(Group::class, 'group_id');
     }
-
-
+    
     public function tasks()
     {
         return $this->hasMany(Task::class);
+    }
+
+    // 自分が所属する DevGroupUser レコードとの関係
+    public function devGroupUsers()
+    {
+        return $this->hasMany(DevGroupUser::class);
+    }
+
+    // 所属しているグループ一覧を取得
+    public function devGroups()
+    {
+        return $this->belongsToMany(DevGroup::class, 'devgroup_user', 'user_id', 'devgroup_id');
     }
 }

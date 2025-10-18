@@ -1,13 +1,18 @@
 <?php
 
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\DeveloperController;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
+
+use App\Http\Controllers\TaskController;
+
 use App\Http\Controllers\GroupController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\EnokkiController; // ← 追加
 use App\Http\Controllers\TaskController;    // ← 追加
+
 
 Route::get('/', function () {
     return Inertia::render('Welcome', [
@@ -27,6 +32,13 @@ Route::middleware('auth')->group(function () {
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 
+
+    //task
+    Route::resource('tasks', TaskController::class);
+    Route::patch('/tasks/{task}/toggle', [TaskController::class, 'toggle'])->name('tasks.toggle');
+    Route::get('/developer', [DeveloperController::class, 'index'])->name('developer.index');
+    Route::post('/developer/create', [DeveloperController::class, 'create'])->name('developer.create');
+    Route::get('/developer/group/{id}', [DeveloperController::class, 'show'])->name('developer.show');
     Route::get('/groups', [GroupController::class, 'index'])->name('groups.index');
     Route::get('/groups/{id}', [GroupController::class, 'show'])->name('groups.show');    
     Route::post('/groups', [GroupController::class, 'store'])->name('groups.store');
@@ -35,6 +47,7 @@ Route::middleware('auth')->group(function () {
     Route::get('/group-create', [GroupController::class, 'create'])->name('groups.create');
     Route::delete('/groups/{id}', [GroupController::class, 'destroy'])->name('groups.destroy');
     Route::delete('/account', [UserController::class, 'destroy'])->name('account.destroy');
+
 
     // 🆕 Enokki育成画面のルートを追加
     Route::get('/enokki', [EnokkiController::class, 'show'])->name('enokki.show');
@@ -46,6 +59,7 @@ Route::middleware('auth')->group(function () {
     Route::get('/character/settings', function () {
         return Inertia::render('Character/Settings');
     })->name('character.settings');
+
 });
 
 require __DIR__.'/auth.php';
