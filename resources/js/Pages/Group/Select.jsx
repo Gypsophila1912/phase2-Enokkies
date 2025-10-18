@@ -2,9 +2,9 @@ import { router, Link } from '@inertiajs/react';
 import React from 'react';
 
 export default function Select({ groups }) {
-  const joinGroup = (groupId) => {
-    router.post(`/groups/${groupId}/join`);
-  };
+    const joinGroup = (groupId) => {
+      router.post(route('groups.join', { id: groupId }));
+    };
 
   const handleDelete = (group) => {
     if (group.users_count > 1) {

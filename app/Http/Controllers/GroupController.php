@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Group;
+use App\Models\Character;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Inertia\Inertia;
@@ -34,22 +35,28 @@ class GroupController extends Controller
         ]);
     }
 
-    public function join($id)
+   public function join(Request $request, $id)
     {
-        $group = Group::findOrFail($id);
-        $user = auth()->user();
+        $groupId = $id ?? $request->input('group_id');
 
-        // すでに参加している場合は処理しない
-        if ($user->group_id === $group->id) {
-            return redirect()->route('groups.show', $group->id)
+        if (! $groupId || ! Group::where('id', $groupId)->exists()) {
+            return redirect()->route('groups.select')
+                ->withErrors(['message' => '指定されたグループが見つかりません。']);
+        }
+
+        $user = Auth::user();
+
+        // すでに同じグループに参加している場合
+        if ($user->group_id === (int) $groupId) {
+            return redirect()->route('enokki.show')
                 ->with('message', 'すでにこのグループに参加しています。');
         }
 
         // グループに参加
-        $user->group_id = $group->id;
+        $user->group_id = $groupId;
         $user->save();
 
-        return redirect()->route('groups.select')
+        return redirect()->route('enokki.show')
             ->with('message', 'グループに参加しました！');
     }
 
@@ -69,6 +76,14 @@ class GroupController extends Controller
             'name' => $validated['name'],
             'description' => $validated['description'] ?? null,
             'created_by' => Auth::id(),
+        ]);
+
+        Character::create([
+            'group_id' => $group->id,
+            'name' => 'エノッキー',
+            'level' => 1,
+            'experience' => 0,
+            'image_path' => 'public/images/EnokkieImage.png',
         ]);
 
         $user = Auth::user();

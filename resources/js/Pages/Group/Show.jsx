@@ -5,10 +5,10 @@ import { usePage, router } from '@inertiajs/react';
 import AppLayout from '@/Layouts/AppLayout';
 
 export default function Show() {
-    const { group, users, auth } = usePage().props;
+    const { group, users } = usePage().props;
 
-    const handleJoin = () => {
-        router.post(route('groups.join', group.id));
+    const joinGroup = (groupId) => {
+      router.post(route('groups.join', { id: groupId }));
     };
 
     return (
@@ -50,7 +50,7 @@ export default function Show() {
                     {/* グループ参加ボタン */}
                     <div className="text-center">
                         <button
-                            onClick={handleJoin}
+                            onClick={() => joinGroup(group.id)}
                             className="bg-green-500 hover:bg-green-600 text-white font-semibold px-6 py-2 rounded-full shadow transition duration-300"
                         >
                             このグループに参加する
