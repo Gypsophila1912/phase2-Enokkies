@@ -158,7 +158,7 @@ export default function TasksIndex() {
                                         <li key={task.id} className="flex items-center justify-between bg-white rounded p-3 border">
                                             <div>
                                                 <div className="font-medium text-gray-800">{task.title}</div>
-                                                <div className="text-sm text-gray-500">締切: {formatDate(task.due_date)}</div>
+                                                <div className="text-sm text-gray-500">期限: {formatDate(task.due_date)}</div>
                                             </div>
 
                                             <div className="flex items-center gap-2">
