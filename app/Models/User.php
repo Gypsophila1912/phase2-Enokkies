@@ -52,8 +52,15 @@ class User extends Authenticatable
                     ->withTimestamps();
     }
 
-    public function tasks()
+    // 自分が所属する DevGroupUser レコードとの関係
+    public function devGroupUsers()
     {
-        return $this->hasMany(Task::class);
+        return $this->hasMany(DevGroupUser::class);
+    }
+
+    // 所属しているグループ一覧を取得
+    public function devGroups()
+    {
+        return $this->belongsToMany(DevGroup::class, 'devgroup_user', 'user_id', 'devgroup_id');
     }
 }
