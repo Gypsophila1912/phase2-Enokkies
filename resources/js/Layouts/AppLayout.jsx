@@ -1,5 +1,5 @@
-import React from 'react';
-import { Link, usePage } from '@inertiajs/react';
+import React from "react";
+import { Link, usePage } from "@inertiajs/react";
 
 export default function AppLayout({ children }) {
     const { auth } = usePage().props;
@@ -10,37 +10,41 @@ export default function AppLayout({ children }) {
             <nav className="bg-lime-100 shadow-md fixed top-0 left-0 right-0 z-50 border-b border-green-300">
                 <div className="max-w-7xl mx-auto px-4 py-3 flex justify-between items-center">
                     {/* 左側のタブ */}
-                        <div className="flex space-x-4">
-                            <Link href="/" className="tab-button">
-                                トップ
-                            </Link>
-                            <Link href="/group-select" className="tab-button">
-                                グループ選択
-                            </Link>
-                            <Link href="/group-create" className="tab-button">
-                                グループ作成
+                    <div className="flex space-x-4">
+                        <Link href="/" className="tab-button">
+                            トップ
+                        </Link>
+                        <Link href="/group-select" className="tab-button">
+                            グループ選択
+                        </Link>
+                        <Link href="/group-create" className="tab-button">
+                            グループ作成
+                        </Link>
+                        <Link
+                            href={route("developer.index")}
+                            className="tab-button"
+                        >
+                            開発者モード
+                        </Link>
+                    </div>
+
+                    {/* ログイン情報 */}
+                    {auth.user ? (
+                        <div className="text-sm text-green-800 font-semibold">
+                            ログイン中：{auth.user.name}
+                        </div>
+                    ) : (
+                        <div>
+                            <Link href="/login" className="tab-button">
+                                ログイン
                             </Link>
                         </div>
-    
-                        {/* ログイン情報 */}
-                        {auth.user ? (
-                            <div className="text-sm text-green-800 font-semibold">
-                                ログイン中：{auth.user.name}
-                            </div>
-                        ) : (
-                            <div>
-                                <Link href="/login" className="tab-button">
-                                    ログイン
-                                </Link>
-                            </div>
-                        )}
+                    )}
                 </div>
             </nav>
 
             {/* ページの中身 */}
-            <main className="max-w-7xl mx-auto px-4 pt-24">
-                {children}
-            </main>
+            <main className="max-w-7xl mx-auto px-4 pt-24">{children}</main>
 
             {/* タブ用スタイル */}
             <style>
