@@ -6,6 +6,11 @@ import { router } from '@inertiajs/react';
 export default function Show({ auth }) {
   const { group, character, tasks } = usePage().props;
 
+  // group.points が undefined / null / 非数 の場合に備えて安全に計算
+  const groupPoints = Number(group?.points ?? 0);
+  const pointsInCycle = ((groupPoints % 10) + 10) % 10; // 0-9 の範囲に正規化
+  const progressPercent = pointsInCycle * 10; // 0,10,...,90 (%)
+
   return (
     <AuthenticatedLayout user={auth.user}>
       <Head title="エノッキー育成" />
@@ -38,17 +43,19 @@ export default function Show({ auth }) {
                 <p>次のレベルまで：あと {character.points_to_next_level}pt</p>
               </div>
             </div>
+          {/* プログレスバー */}
             <div className="mt-4">
               <div className="w-full bg-gray-300 rounded-full h-4">
                 <div
                   className="bg-green-500 h-4 rounded-full transition-all duration-500"
-                  style={{ width: `${(character.current_points % 10) * 10}%` }}
+                  style={{ width: `${progressPercent}%` }}
                 ></div>
               </div>
               <p className="text-sm text-gray-600 mt-1 text-right">
-                {character.current_points % 10}pt / 10pt
+                {pointsInCycle}pt / 10pt
               </p>
             </div>
+
           </section>
 
           {/* グループ情報 */}
@@ -106,7 +113,7 @@ export default function Show({ auth }) {
                 ごはんをあげる
               </button>
             </Link>
-            <Link href="/tasks/edit">
+            <Link href="/tasks">
               <button className="bg-blue-300 hover:bg-blue-400 text-white font-bold py-2 px-4 rounded-full shadow">
                 タスク編集
               </button>

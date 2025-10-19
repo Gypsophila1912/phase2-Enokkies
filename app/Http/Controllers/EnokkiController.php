@@ -25,21 +25,34 @@ class EnokkiController extends Controller
         // キャラクターが存在しない場合の対処
         $character = $group->character;
         if (!$character) {
-            // 必要に応じてエラーページに飛ばすか、仮データを返す
             return redirect()->route('groups.select')->withErrors(['message' => 'キャラクター情報が見つかりません。']);
         }
 
-        $tasks = $user->tasks()->get();
+        // グループに紐づくタスクを取得してフロント用に整形
+        $tasks = Task::where('group_id', $group->id)
+            ->orderBy('created_at', 'desc')
+            ->get()
+            ->map(function (Task $t) {
+                return [
+                    'id' => $t->id,
+                    'title' => $t->title,
+                    'memo' => $t->description, // フロントは memo を使っている場合に備える
+                    'description' => $t->description,
+                    'due_date' => $t->due_date ? $t->due_date->toDateString() : null,
+                    'is_done' => ! is_null($t->completed_at),
+                ];
+            })->values();
 
         $groupCreatedAt = Carbon::parse($group->created_at);
         $daysSinceCreated = $groupCreatedAt->diffInDays(Carbon::now());
 
         return Inertia::render('Enokki/Show', [
             'group' => [
+                'id' => $group->id,
                 'name' => $group->name,
                 'description' => $group->description,
                 'members_count' => $group->users()->count(),
-                'points' => $group->points . 'pt',
+                'points' => (int) ($group->points ?? 0), // 数値で渡す
                 'days_since_created' => $daysSinceCreated,
             ],
             'character' => [
