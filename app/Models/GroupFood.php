@@ -9,6 +9,8 @@ class GroupFood extends Model
 {
     use HasFactory;
 
+    protected $table = 'group_foods';
+
     protected $fillable = [
         'group_id',
         'food_id',

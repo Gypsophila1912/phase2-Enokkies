@@ -5,7 +5,7 @@ export default function AppLayout({ children }) {
     const { auth } = usePage().props;
 
     return (
-        <div className="min-h-screen bg-gradient-to-br from-lime-100 via-green-50 to-green-200 font-sans text-gray-800">
+        <div className="h-screen bg-gradient-to-br from-lime-100 via-green-50 to-green-200 font-sans text-gray-800">
             {/* ナビゲーションバー */}
             <nav className="bg-lime-100 shadow-md fixed top-0 left-0 right-0 z-50 border-b border-green-300">
                 <div className="max-w-7xl mx-auto px-4 py-3 flex justify-between items-center">

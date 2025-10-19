@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Food;
+use App\Models\GroupFood;
 use Inertia\Inertia;
 
 class FoodController extends Controller
@@ -53,7 +54,7 @@ class FoodController extends Controller
     /**
      * ご飯を購入してグループの所持ご飯に追加する
      *
-     * @param \App\Models\Food $food
+     * @param \App\Models\Group_Food $food
      * @return \Illuminate\Http\RedirectResponse
      */
     public function buy(Food $food)
@@ -74,7 +75,7 @@ class FoodController extends Controller
         $group->decrement('points', $food->price);
 
         // 所持ご飯に追加（group_foodsテーブル）
-        $groupFood = \App\Models\GroupFood::firstOrCreate(
+        $groupFood = GroupFood::firstOrCreate(
             ['group_id' => $group->id, 'food_id' => $food->id],
             ['quantity' => 0]
         );
