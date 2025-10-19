@@ -43,8 +43,13 @@ class EnokkiController extends Controller
                 ];
             })->values();
 
+        // 育て始めてからの日数（小数点切り上げ）
         $groupCreatedAt = Carbon::parse($group->created_at);
-        $daysSinceCreated = $groupCreatedAt->diffInDays(Carbon::now());
+        $hoursSinceCreated = $groupCreatedAt->diffInHours(Carbon::now());
+        $daysSinceCreated = ceil($hoursSinceCreated / 24);
+
+        // 所持ポイントが null の場合は 0 にする
+        $groupPoints = $group->points ?? 0;
 
         return Inertia::render('Enokki/Show', [
             'group' => [
@@ -52,7 +57,9 @@ class EnokkiController extends Controller
                 'name' => $group->name,
                 'description' => $group->description,
                 'members_count' => $group->users()->count(),
+
                 'points' => (int) ($group->points ?? 0), // 数値で渡す
+
                 'days_since_created' => $daysSinceCreated,
             ],
             'character' => [
