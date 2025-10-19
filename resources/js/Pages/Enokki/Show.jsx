@@ -6,6 +6,11 @@ import { router } from '@inertiajs/react';
 export default function Show({ auth }) {
   const { group, character, tasks } = usePage().props;
 
+  // group.points が undefined / null / 非数 の場合に備えて安全に計算
+  const groupPoints = Number(group?.points ?? 0);
+  const pointsInCycle = ((groupPoints % 10) + 10) % 10; // 0-9 の範囲に正規化
+  const progressPercent = pointsInCycle * 10; // 0,10,...,90 (%)
+
   return (
     <AuthenticatedLayout user={auth.user}>
       <Head title="エノッキー育成" />
@@ -72,9 +77,26 @@ export default function Show({ auth }) {
                 }}>
             </div>
 
+          {/* プログレスバー */}
+            <div className="mt-4">
+              <div className="w-full bg-gray-300 rounded-full h-4">
+                <div
+                  className="bg-green-500 h-4 rounded-full transition-all duration-500"
+                  style={{ width: `${progressPercent}%` }}
+                ></div>
+              </div>
+              <p className="text-sm text-gray-600 mt-1 text-right">
+                {pointsInCycle}pt / 10pt
+              </p>
+            </div>
+
+          </section>
+
+
             <h2 className="text-md font-bold text-purple-700 mb-2">💬 今日のひとこと</h2>
             <p className="text-sm">「好きな色はみどり！」</p>
             </div>
+
 
             <div className="flex justify-center mt-8">
                 <div className="flex flex-row gap-4">
@@ -139,6 +161,32 @@ export default function Show({ auth }) {
                 </li>
               ))}
             </ul>
+
+          </section>
+
+          {/* ボタンたち */}
+          <div className="flex flex-wrap gap-4 justify-center">
+            <Link href="/food-shop">
+              <button className="bg-yellow-300 hover:bg-yellow-400 text-white font-bold py-2 px-4 rounded-full shadow">
+                ごはんショップ
+              </button>
+            </Link>
+            <Link href="/feed-enokki">
+              <button className="bg-pink-300 hover:bg-pink-400 text-white font-bold py-2 px-4 rounded-full shadow">
+                ごはんをあげる
+              </button>
+            </Link>
+            <Link href="/tasks">
+              <button className="bg-blue-300 hover:bg-blue-400 text-white font-bold py-2 px-4 rounded-full shadow">
+                タスク編集
+              </button>
+            </Link>
+            <Link href="/character/settings">
+              <button className="bg-purple-300 hover:bg-purple-400 text-white font-bold py-2 px-4 rounded-full shadow">
+                キャラ設定
+              </button>
+            </Link>
+
           </div>
         </section>
 
