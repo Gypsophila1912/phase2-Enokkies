@@ -15,6 +15,7 @@ class GroupFood extends Model
         'group_id',
         'food_id',
         'quantity',
+        'rarity',
     ];
 
     // グループとのリレーション

@@ -16,6 +16,7 @@ class Character extends Model
         'level',
         'experience',
         'image_path',
+        'affection', 
     ];
 
     //グループ

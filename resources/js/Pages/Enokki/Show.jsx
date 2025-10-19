@@ -48,7 +48,7 @@ export default function Show({ auth }) {
                         </h2>
                         <div className="flex items-center space-x-6">
                             <img
-                                src="images/EnokkieImage.png"
+                                src={character.image_url}
                                 alt="エノッキー"
                                 className="w-24 h-24 rounded-full border-4 border-green-400"
                             />
@@ -149,12 +149,13 @@ export default function Show({ auth }) {
                                 ごはんショップ
                             </button>
                         </Link>
-                        <button
-                            onClick={() => setShowModal(true)}
+                        <></>
+                        <Link
+                            href={route("admiring.index")}
                             className="bg-pink-300 hover:bg-pink-400 text-white font-bold py-2 px-4 rounded-full shadow"
                         >
                             ごはんをあげる
-                        </button>
+                        </Link>
                         <Link href="/tasks/edit">
                             <button className="bg-blue-300 hover:bg-blue-400 text-white font-bold py-2 px-4 rounded-full shadow">
                                 タスク編集
@@ -167,62 +168,6 @@ export default function Show({ auth }) {
                         </Link>
                     </div>
                 </div>
-
-                {/* ごはんをあげるモーダル */}
-                {showModal && (
-                    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-                        <div className="bg-white rounded-lg p-6 max-w-md w-full shadow-lg relative">
-                            <h3 className="text-xl font-bold mb-4 text-green-800">
-                                ごはんをあげる
-                            </h3>
-                            <ul className="space-y-3 max-h-60 overflow-y-auto">
-                                {foods && foods.length > 0 ? (
-                                    foods.map((food) => (
-                                        <li
-                                            key={food.id}
-                                            className="flex items-center justify-between border-b pb-2"
-                                        >
-                                            <div>
-                                                <p className="font-semibold">
-                                                    {food.name}
-                                                </p>
-                                                <p className="text-sm text-gray-600">
-                                                    レアリティ: {food.rarity}
-                                                </p>
-                                                <p className="text-sm text-gray-600">
-                                                    経験値: {food.exp_value}
-                                                </p>
-                                                <p className="text-sm text-gray-600">
-                                                    ポイント: {food.points}
-                                                </p>
-                                                <p className="text-sm text-gray-500">
-                                                    所持数: {food.quantity || 0}
-                                                </p>
-                                            </div>
-                                            <button
-                                                onClick={() =>
-                                                    handleFeed(food.id)
-                                                }
-                                                className="bg-green-500 hover:bg-green-600 text-white py-1 px-3 rounded"
-                                            >
-                                                あげる
-                                            </button>
-                                        </li>
-                                    ))
-                                ) : (
-                                    <p>ごはんがありません。</p>
-                                )}
-                            </ul>
-                            <button
-                                onClick={() => setShowModal(false)}
-                                className="absolute top-2 right-2 text-gray-500 hover:text-gray-800 font-bold text-xl"
-                                aria-label="Close modal"
-                            >
-                                &times;
-                            </button>
-                        </div>
-                    </div>
-                )}
 
                 {/* キラキラアニメーション用スタイル */}
                 <style>

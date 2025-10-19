@@ -5,11 +5,18 @@ import CharacterDisplay from "@/Components/AdmiringRoom/CharacterDisplay";
 import ProfilePanel from "@/Components/AdmiringRoom/ProfilePanel";
 import ItemInventory from "@/Components/AdmiringRoom/ItemInventory";
 
-export default function EnokkieHome({ groupId, character, items = [] }) {
+export default function EnokkieHome({ groupId, character, items }) {
     const [exp, setExp] = useState(character.experience || 0);
     const [name, setName] = useState(character.name || "エノッキー");
 
     const { patch } = useForm();
+
+    console.log("=== 親コンポーネント AdmiringRoom ===");
+    console.log("items:", items);
+    console.log("items length:", items?.length);
+    console.log("items type:", typeof items);
+    console.log("items詳細:", JSON.stringify(items, null, 2));
+    console.log("====================================");
 
     const handleDropItem = (item) => {
         const newExp = exp + item.points;
@@ -81,6 +88,7 @@ export default function EnokkieHome({ groupId, character, items = [] }) {
                                 chrname={name}
                                 exp={exp}
                                 level={Math.floor(exp / 100) + 1}
+                                affection={character.affection}
                                 onNameUpdate={handleNameUpdate}
                             />
                         </div>

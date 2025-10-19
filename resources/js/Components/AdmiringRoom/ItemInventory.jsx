@@ -3,6 +3,16 @@ export default function ItemInventory({ items }) {
         e.dataTransfer.setData("item", JSON.stringify(item));
     };
 
+    console.log("=== ItemInventory コンポーネント ===");
+    console.log("受け取ったitems:", items);
+    console.log("items length:", items?.length);
+    console.log("items type:", typeof items);
+    if (items && items.length > 0) {
+        console.log("最初のアイテム:", items[0]);
+        console.log("最初のアイテムのキー:", Object.keys(items[0]));
+    }
+    console.log("=====================================");
+
     return (
         <div className="mt-6 w-full px-6">
             <div className="bg-white/80 backdrop-blur-sm border border-green-300 p-4 rounded-t-xl shadow-inner">

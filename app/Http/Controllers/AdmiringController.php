@@ -19,7 +19,21 @@ class AdmiringController extends Controller
         $character = Character::where('group_id', $groupId)->first();
         
         // アイテム一覧（仮データ、後でDBから取得）
-        $items = [];
+        $items = GroupFood::where('group_id', $groupId)
+        ->where('quantity', '>', 0)
+        ->with('food')
+        ->get()
+        ->map(function ($groupFood) {
+            return [
+                'id' => $groupFood->id,
+                'name' => $groupFood->food->name,
+                'image_path' => $groupFood->food->image_path,
+                'points' => $groupFood->food->exp_points,
+                'quantity' => $groupFood->quantity,
+                'rarity' => $groupFood->rarity,
+                'food_id' => $groupFood->food_id,
+            ];
+        });
         
         return inertia('EnokkieAdmiringRoom/AdmiringRoom', [
             'character' => $character,
