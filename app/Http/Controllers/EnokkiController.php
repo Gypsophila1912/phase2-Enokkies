@@ -17,6 +17,7 @@ class EnokkiController extends Controller
         $user = Auth::user();
         $group = $user->group;
 
+
         // グループに未所属ならリダイレクト
         if (!$group) {
             return redirect()->route('groups.select');

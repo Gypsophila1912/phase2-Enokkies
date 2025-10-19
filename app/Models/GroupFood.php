@@ -4,24 +4,26 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use App\Models\Group;
 
-class Character extends Model
+class GroupFood extends Model
 {
     use HasFactory;
 
     protected $fillable = [
         'group_id',
-        'name',
-        'level',
-        'experience',
-        'image_path',
+        'food_id',
+        'quantity',
     ];
 
-    //グループ
+    // グループとのリレーション
     public function group()
     {
         return $this->belongsTo(Group::class);
     }
-    
+
+    // ご飯とのリレーション
+    public function food()
+    {
+        return $this->belongsTo(Food::class);
+    }
 }

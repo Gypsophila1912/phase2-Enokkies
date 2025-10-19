@@ -11,7 +11,8 @@ use App\Http\Controllers\TaskController;
 use App\Http\Controllers\GroupController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\EnokkiController; // ← 追加
-use App\Http\Controllers\TaskController;    // ← 追加
+use App\Http\Controllers\FoodController;
+use App\Http\Controllers\FoodGiveController;
 
 
 Route::get('/', function () {
@@ -60,6 +61,15 @@ Route::middleware('auth')->group(function () {
         return Inertia::render('Character/Settings');
     })->name('character.settings');
 
+    // 🆕 フードショップ画面へのルートを追加
+    Route::get('/food-shop', [FoodController::class, 'index'])->name('food.shop');
+    // ご飯購入処理
+    Route::post('/foods/buy/{food}', [FoodController::class, 'buy'])->name('foods.buy');
+
+    // ご飯をあげる処理
+    Route::post('/foods/give', [FoodController::class, 'feedToGroup'])->name('foods.give');
+
+    
 });
 
 require __DIR__.'/auth.php';
