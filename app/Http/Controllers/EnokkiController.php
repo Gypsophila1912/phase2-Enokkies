@@ -25,21 +25,25 @@ class EnokkiController extends Controller
         // キャラクターが存在しない場合の対処
         $character = $group->character;
         if (!$character) {
-            // 必要に応じてエラーページに飛ばすか、仮データを返す
             return redirect()->route('groups.select')->withErrors(['message' => 'キャラクター情報が見つかりません。']);
         }
 
         $tasks = $user->tasks()->get();
 
+        // 育て始めてからの日数（小数点切り上げ）
         $groupCreatedAt = Carbon::parse($group->created_at);
-        $daysSinceCreated = $groupCreatedAt->diffInDays(Carbon::now());
+        $hoursSinceCreated = $groupCreatedAt->diffInHours(Carbon::now());
+        $daysSinceCreated = ceil($hoursSinceCreated / 24);
+
+        // 所持ポイントが null の場合は 0 にする
+        $groupPoints = $group->points ?? 0;
 
         return Inertia::render('Enokki/Show', [
             'group' => [
                 'name' => $group->name,
                 'description' => $group->description,
                 'members_count' => $group->users()->count(),
-                'points' => $group->points . 'pt',
+                'points' => $groupPoints . 'pt',
                 'days_since_created' => $daysSinceCreated,
             ],
             'character' => [
