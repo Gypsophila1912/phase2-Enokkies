@@ -15,27 +15,27 @@ class FoodSeeder extends Seeder
     {
         Food::insert([
             [
-                'name' => 'エノッキーごはん',
+                'name' => 'エノキアイス',
                 'price' => 10,
-                'image_path' => '/images/foods/rice.png',
+                'image_path' => '/food/ice.png',
                 'rarity' => 'common',
             ],
             [
-                'name' => 'きのこバーガー',
+                'name' => 'エノキビスケット',
                 'price' => 25,
-                'image_path' => '/images/foods/burger.png',
+                'image_path' => '/food/biscuit.png',
                 'rarity' => 'common',
             ],
             [
-                'name' => 'エノッキーラーメン',
+                'name' => 'カツ丼',
                 'price' => 60,
-                'image_path' => '/images/foods/ramen.png',
+                'image_path' => '/food/normal.png',
                 'rarity' => 'rare',
             ],
             [
-                'name' => 'きのこステーキ',
+                'name' => 'ステーキ',
                 'price' => 90,
-                'image_path' => '/images/foods/steak.png',
+                'image_path' => '/food/steak.png',
                 'rarity' => 'rare',
             ],
             [
@@ -50,6 +50,32 @@ class FoodSeeder extends Seeder
                 'image_path' => '/images/foods/tempura.png',
                 'rarity' => 'super_rare',
             ],
+            [
+                'name' => 'ベビエノっキー',
+                'price' => 250,
+                'image_path' => './Eno/baby.png',
+                'rarity' => 'super_rare',
+            ],
+            [
+                'name' => 'エンジニアエノっキー',
+                'price' => 250,
+                'image_path' => './Eno/en.png',
+                'rarity' => 'rare',
+            ],
+            
+            [
+                'name' => 'パンプキンエノッキー',
+                'price' => 300,
+                'image_path' => './Eno/pumpkin.png',
+                'rarity' => 'super_rare',
+            ],
+            [
+                'name' => 'サイヤエノッキー',
+                'price' => 500,
+                'image_path' => './Eno/saiya.png',
+                'rarity' => 'super_rare',
+            ],
         ]);
     }
 }
+

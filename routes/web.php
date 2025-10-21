@@ -13,7 +13,7 @@ use App\Http\Controllers\FoodController;
 use App\Http\Controllers\FoodGiveController;
 use App\Http\Controllers\TaskController;    // ← 追加
 use App\Http\Controllers\AdmiringController;
-
+use App\Http\Controllers\CharacterController;
 
 Route::get('/', function () {
     return Inertia::render('Welcome', [
@@ -76,6 +76,10 @@ Route::middleware('auth')->group(function () {
     //enokkie admiring
     Route::get('/admiring', [AdmiringController::class, 'index'])->name('admiring.index');
     Route::patch('/enokkie/{groupId}/name', [AdmiringController::class, 'updateName'])->name('enokkie.updateName');
+    //character dressing room
+    Route::get('/character/dressing-room', [CharacterController::class, 'dressingRoom'])
+    ->name('character.dressing-room')
+    ->middleware('auth');
 });
 
 require __DIR__.'/auth.php';

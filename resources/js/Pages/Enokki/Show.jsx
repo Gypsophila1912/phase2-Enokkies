@@ -155,7 +155,7 @@ export default function Show({ auth }) {
                         >
                             ごはんをあげる
                         </button>
-                        <Link href="/tasks/edit">
+                        <Link href="/EnokkiAdmiringRoom/AdmiringRoom">
                             <button className="bg-blue-300 hover:bg-blue-400 text-white font-bold py-2 px-4 rounded-full shadow">
                                 タスク編集
                             </button>
@@ -163,6 +163,11 @@ export default function Show({ auth }) {
                         <Link href="/character/settings">
                             <button className="bg-purple-300 hover:bg-purple-400 text-white font-bold py-2 px-4 rounded-full shadow">
                                 キャラ設定
+                            </button>
+                        </Link>
+                        <Link href={route('character.dressing-room')}>
+                          <button className="bg-orange-300 hover:bg-orange-400 text-white font-bold py-2 px-4 rounded-full shadow">
+                                  お着替え部屋
                             </button>
                         </Link>
                     </div>
