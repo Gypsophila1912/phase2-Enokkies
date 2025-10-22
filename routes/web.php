@@ -8,6 +8,7 @@ use Inertia\Inertia;
 use App\Http\Controllers\GroupController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\EnokkiController; // ← 追加
+use App\Http\Controllers\TaskController;
 
 
 

@@ -27,7 +27,7 @@ class TaskController extends Controller
             ->orderBy('created_at', 'desc')
             ->get();
 
-        $group = \App\Models\Group::select(['id','name','description','points'])->find($groupId);
+        $group = Group::select(['id','name','description','points'])->find($groupId);
 
         return Inertia::render('Tasks/Index', [
             'tasks' => $tasks->toArray(),
