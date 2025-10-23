@@ -3,7 +3,6 @@ import { Head } from "@inertiajs/react";
 import AuthenticatedLayout from "@/Layouts/AppLayout";
 
 export default function DressingRoom({ auth }) {
-    // group_idの取得方法は適宜修正（例: auth.user.group_id など）
     const groupId = auth.user.group_id || 1;
     const [selectedImage, setSelectedImage] = useState("/images/EnokkieImage.png");
     const [showClothes, setShowClothes] = useState(false);
@@ -12,65 +11,40 @@ export default function DressingRoom({ auth }) {
     const [clothesOptions, setClothesOptions] = useState([]);
     const [loadingClothes, setLoadingClothes] = useState(false);
 
-    // Load background and selected image from localStorage on mount
+    // ローカルストレージ復元
     useEffect(() => {
         const storedBg = localStorage.getItem("selectedBackground");
-        if (storedBg) {
-            setSelectedBackground(storedBg);
-        }
+        if (storedBg) setSelectedBackground(storedBg);
         const storedImage = localStorage.getItem("selectedImage");
-        if (storedImage) {
-            setSelectedImage(storedImage);
-        }
+        if (storedImage) setSelectedImage(storedImage);
     }, []);
 
-    // Store background in localStorage when it changes
+    // 変更時に保存
     useEffect(() => {
-        if (selectedBackground) {
-            localStorage.setItem("selectedBackground", selectedBackground);
-        }
+        if (selectedBackground) localStorage.setItem("selectedBackground", selectedBackground);
     }, [selectedBackground]);
-
-    // Store selected image in localStorage when it changes
     useEffect(() => {
-        if (selectedImage) {
-            localStorage.setItem("selectedImage", selectedImage);
-        }
+        if (selectedImage) localStorage.setItem("selectedImage", selectedImage);
     }, [selectedImage]);
 
-    // グループの選択中の服を取得
+    // グループの服取得
     const fetchSelectedDressing = async () => {
         try {
             const res = await fetch(`/api/group/selected-dressing?group_id=${groupId}`);
             if (res.ok) {
                 const data = await res.json();
-                if (data.selected_dressing && data.selected_dressing.image_path) {
+                if (data.selected_dressing?.image_path) {
                     setSelectedImage(data.selected_dressing.image_path);
                 } else {
                     setSelectedImage("/images/EnokkieImage.png");
                 }
             }
-        } catch (e) {
+        } catch {
             setSelectedImage("/images/EnokkieImage.png");
         }
     };
 
-    // 初回マウント時に選択中の服を取得
-    useEffect(() => {
-        fetchSelectedDressing();
-    }, []);
-
-    // 服を選択したときにグループの服を更新
-    const handleSelectClothes = async (imgPath, dressingId) => {
-        setSelectedImage(imgPath);
-        await fetch("/api/group/select-dressing", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ group_id: groupId, dressing_id: dressingId }),
-        });
-    };
-
-    // 服リスト取得関数
+    // 服一覧取得
     const fetchClothes = async () => {
         setLoadingClothes(true);
         try {
@@ -79,22 +53,39 @@ export default function DressingRoom({ auth }) {
                 const data = await res.json();
                 setClothesOptions(data.dressings || []);
             }
-        } catch (e) {
+        } catch {
             setClothesOptions([]);
         }
         setLoadingClothes(false);
     };
 
-    // 初回マウント時にも取得
     useEffect(() => {
+        fetchSelectedDressing();
         fetchClothes();
+
+        // ✅ FoodShopからのカスタムイベントを受け取って即再取得
+        const handleNewDressing = () => {
+            console.log("🎉 新しい服が購入されました！");
+            fetchClothes();
+        };
+
+        window.addEventListener("dressing-added", handleNewDressing);
+        return () => window.removeEventListener("dressing-added", handleNewDressing);
     }, []);
 
-    // 服を選ぶボタン押下時に再取得
+    // 服選択
+    const handleSelectClothes = async (imgPath, dressingId) => {
+        setSelectedImage(imgPath);
+        await fetch("/api/group/select-dressing", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ group_id: groupId, dressing_id: dressingId }),
+        });
+        await fetchClothes();
+    };
+
     const handleShowClothes = () => {
-        if (!showClothes) {
-            fetchClothes();
-        }
+        if (!showClothes) fetchClothes();
         setShowClothes(!showClothes);
     };
 
@@ -103,39 +94,37 @@ export default function DressingRoom({ auth }) {
         "/Room/Fashionable.png",
         "/Room/kiRoom.png",
         "/Room/EnokkieRoom.png",
+        "/Room/NomalRoom.png",
     ];
 
     return (
         <AuthenticatedLayout user={auth.user}>
             <Head title="お着替えメニュー" />
-
-            <div className={`min-h-screen w-full flex flex-col items-center justify-center font-sans text-gray-900 relative bg-cover bg-center`} style={{backgroundImage: `url(${selectedBackground})`}}>
-                {/* 白い透明レイヤー */}
+            <div
+                className="min-h-screen w-full flex flex-col items-center justify-center font-sans text-gray-900 relative bg-cover bg-center"
+                style={{ backgroundImage: `url(${selectedBackground})` }}
+            >
                 <div className="absolute inset-0 bg-white bg-opacity-30 pointer-events-none"></div>
 
-                {/* 戻るボタン */}
                 <div className="absolute top-4 left-4 z-20">
                     <button
                         onClick={() => window.history.back()}
-                        className="bg-gradient-to-r from-green-400 to-green-600 hover:from-green-500 hover:to-green-700 text-white font-bold py-2 px-4 rounded-full shadow-lg transition-colors duration-300"
+                        className="bg-gradient-to-r from-green-400 to-green-600 text-white font-bold py-2 px-4 rounded-full shadow-lg hover:from-green-500 hover:to-green-700 transition-colors"
                     >
                         戻る
                     </button>
                 </div>
 
-                {/* タイトル */}
                 <h2 className="fixed top-4 left-1/2 transform -translate-x-1/2 z-20 text-4xl font-extrabold text-green-900 drop-shadow-[0_2px_6px_rgba(0,128,0,0.7)]">
                     🌱 お着替え部屋
                 </h2>
 
-                {/* エノッキー画像 */}
                 <img
                     src={selectedImage}
                     alt="エノッキー"
                     className="w-60 h-60 object-contain rounded-full border-4 border-green-300 shadow-lg bg-white/80 backdrop-blur-md relative z-10"
                 />
 
-                {/* 服選択ボタン */}
                 <button
                     onClick={handleShowClothes}
                     className="mt-6 bg-yellow-400 hover:bg-yellow-500 text-white font-bold py-2 px-6 rounded-full shadow-lg relative z-10"
@@ -143,7 +132,6 @@ export default function DressingRoom({ auth }) {
                     {showClothes ? "服を隠す" : "服を選ぶ"}
                 </button>
 
-                {/* 背景選択ボタン */}
                 <button
                     onClick={() => setShowBackgrounds(!showBackgrounds)}
                     className="mt-4 bg-purple-400 hover:bg-purple-500 text-white font-bold py-2 px-6 rounded-full shadow-lg relative z-10"
@@ -151,9 +139,8 @@ export default function DressingRoom({ auth }) {
                     {showBackgrounds ? "とじる" : "お着替え部屋内装"}
                 </button>
 
-                {/* 服アイコン一覧 */}
                 {showClothes && (
-                    <div className="mt-6 flex flex-wrap justify-center gap-6 bg-white bg-opacity-90 backdrop-blur-sm rounded-xl p-4 shadow-lg border border-white/80 relative z-10">
+                    <div className="mt-6 flex flex-wrap justify-center gap-6 bg-white bg-opacity-90 rounded-xl p-4 shadow-lg border border-white/80 relative z-10">
                         {loadingClothes ? (
                             <div>読み込み中...</div>
                         ) : clothesOptions.length === 0 ? (
@@ -169,29 +156,28 @@ export default function DressingRoom({ auth }) {
                                             ? "border-emerald-500 scale-105 shadow-[0_0_10px_2px_rgba(16,185,129,0.7)]"
                                             : "border-transparent hover:border-green-400 hover:scale-110"
                                     }`}
-                                    onClick={() => handleSelectClothes(item.image_path || item.path, item.id || item.dressing_id)}
-                                    style={selectedImage === (item.image_path || item.path) ? {filter: "drop-shadow(0 0 6px rgba(16,185,129,0.8))"} : {}}
+                                    onClick={() =>
+                                        handleSelectClothes(item.image_path || item.path, item.id || item.dressing_id)
+                                    }
                                 />
                             ))
                         )}
                     </div>
                 )}
 
-                {/* 背景アイコン一覧 */}
                 {showBackgrounds && (
-                    <div className="mt-6 flex flex-wrap justify-center gap-6 bg-white bg-opacity-90 backdrop-blur-sm rounded-xl p-4 shadow-lg border border-white/80 relative z-10">
-                        {backgroundOptions.map((path, index) => (
+                    <div className="mt-6 flex flex-wrap justify-center gap-6 bg-white bg-opacity-90 rounded-xl p-4 shadow-lg border border-white/80 relative z-10">
+                        {backgroundOptions.map((path, i) => (
                             <img
-                                key={index}
+                                key={i}
                                 src={path}
-                                alt={`背景${index + 1}`}
+                                alt={`背景${i + 1}`}
                                 className={`w-28 h-28 rounded-lg cursor-pointer border-4 transition-transform duration-200 ${
                                     selectedBackground === path
                                         ? "border-emerald-500 scale-105 shadow-[0_0_10px_2px_rgba(16,185,129,0.7)]"
                                         : "border-transparent hover:border-purple-400 hover:scale-110"
                                 }`}
                                 onClick={() => setSelectedBackground(path)}
-                                style={selectedBackground === path ? {filter: "drop-shadow(0 0 6px rgba(16,185,129,0.8))"} : {}}
                             />
                         ))}
                     </div>

@@ -5,18 +5,30 @@ export default function FoodShop({ foods, groupPoints }) {
   const [points, setPoints] = useState(groupPoints);
   const [flashMessage, setFlashMessage] = useState('');
 
-  const handleBuy = (foodId, price) => {
+  const handleBuy = (foodId, price, category) => {
     if (points < price) {
       setFlashMessage('ポイントが足りません😭');
       return;
     }
 
     setPoints(prev => prev - price);
-    setFlashMessage('購入しました！');
 
-    router.post(`/foods/buy/${foodId}`, {}, {
-      onError: () => setFlashMessage('購入に失敗しました…💧'),
-    });
+    // foodとdressingは同じショップUIを使うが、購入APIは異なるエンドポイントを呼び出す
+    if (category === 'dressing') {
+      router.post(`/dressings/buy/${foodId}`, {}, {
+        onSuccess: () => {
+          setFlashMessage('服を購入しました👕✨');
+          // DressingRoom コンポーネントに服一覧更新を知らせるイベントを発火
+          window.dispatchEvent(new CustomEvent('updateDressingList'));
+        },
+        onError: () => setFlashMessage('購入に失敗しました…💧'),
+      });
+    } else {
+      router.post(`/foods/buy/${foodId}`, {}, {
+        onSuccess: () => setFlashMessage('購入しました！'),
+        onError: () => setFlashMessage('購入に失敗しました…💧'),
+      });
+    }
   };
 
   useEffect(() => {
@@ -70,7 +82,7 @@ export default function FoodShop({ foods, groupPoints }) {
                   ? 'bg-yellow-500 hover:bg-yellow-600'
                   : 'bg-gray-400 cursor-not-allowed'
               }`}
-              onClick={() => handleBuy(food.id, food.price)}
+              onClick={() => handleBuy(food.id, food.price, food.category)}
               disabled={points < food.price}
             >
               {points >= food.price ? '買う' : 'ポイント不足'}

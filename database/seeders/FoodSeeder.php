@@ -39,17 +39,23 @@ class FoodSeeder extends Seeder
                 'rarity' => 'rare',
             ],
             [
-                'name' => '高級トリュフ',
-                'price' => 150,
-                'image_path' => '/images/foods/truffle.png',
+                'name' => 'エノキ天ぷら',
+                'price' => 200,
+                'image_path' => '/food/tempra.png',
                 'rarity' => 'super_rare',
             ],
             [
-                'name' => '黄金エノキ天ぷら',
-                'price' => 200,
-                'image_path' => '/images/foods/tempura.png',
+                'name' => '寿司の盛り合わせ',
+                'price' => 500,
+                'image_path' => '/food/sushi.png',
                 'rarity' => 'super_rare',
-            ]
+            ],
+            [
+                'name'=>'黄金のエノキ鍋',
+                'price'=>1000,
+                'image_path'=>'/food/golden_nabe.png',
+                'rarity'=>'super_rare',
+            ],
         ]);
     }
 }

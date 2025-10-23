@@ -14,6 +14,7 @@ use App\Http\Controllers\FoodGiveController;
 use App\Http\Controllers\TaskController;    // ← 追加
 use App\Http\Controllers\AdmiringController;
 use App\Http\Controllers\CharacterController;
+use App\Http\Controllers\DressingController;
 
 Route::get('/', function () {
     return Inertia::render('Welcome', [
@@ -80,6 +81,10 @@ Route::middleware('auth')->group(function () {
     Route::get('/character/dressing-room', [CharacterController::class, 'dressingRoom'])
     ->name('character.dressing-room')
     ->middleware('auth');
+
+    
+
+    Route::post('/dressings/buy/{id}', [DressingController::class, 'buy'])->name('dressings.buy');
 
     // デバッグ用: ログインユーザーに500ポイント付与
     Route::post('/debug/add-points', function () {
