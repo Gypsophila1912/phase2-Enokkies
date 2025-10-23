@@ -16,7 +16,7 @@ class FoodController extends Controller
 
         return Inertia::render('FoodShop', [
             'foods' => $foods,
-            'points' => $group ? $group->points : 0, // グループの所持ポイント
+            'groupPoints' => $group ? $group->points : 0, // グループの所持ポイント
         ]);
     }
 

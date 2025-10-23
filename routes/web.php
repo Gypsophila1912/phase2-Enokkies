@@ -80,6 +80,14 @@ Route::middleware('auth')->group(function () {
     Route::get('/character/dressing-room', [CharacterController::class, 'dressingRoom'])
     ->name('character.dressing-room')
     ->middleware('auth');
+
+    // デバッグ用: ログインユーザーに500ポイント付与
+    Route::post('/debug/add-points', function () {
+        $user = auth()->user();
+        $user->point = 500;
+        $user->save();
+        return response()->json(['message' => '500ポイント付与しました', 'point' => $user->point]);
+    });
 });
 
 require __DIR__.'/auth.php';

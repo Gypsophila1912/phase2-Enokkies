@@ -49,32 +49,7 @@ class FoodSeeder extends Seeder
                 'price' => 200,
                 'image_path' => '/images/foods/tempura.png',
                 'rarity' => 'super_rare',
-            ],
-            [
-                'name' => 'ベビエノっキー',
-                'price' => 250,
-                'image_path' => './Eno/baby.png',
-                'rarity' => 'super_rare',
-            ],
-            [
-                'name' => 'エンジニアエノっキー',
-                'price' => 250,
-                'image_path' => './Eno/en.png',
-                'rarity' => 'rare',
-            ],
-            
-            [
-                'name' => 'パンプキンエノッキー',
-                'price' => 300,
-                'image_path' => './Eno/pumpkin.png',
-                'rarity' => 'super_rare',
-            ],
-            [
-                'name' => 'サイヤエノッキー',
-                'price' => 500,
-                'image_path' => './Eno/saiya.png',
-                'rarity' => 'super_rare',
-            ],
+            ]
         ]);
     }
 }

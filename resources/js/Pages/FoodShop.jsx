@@ -1,18 +1,18 @@
 import React, { useState, useEffect } from 'react';
 import { Link, router } from '@inertiajs/react';
 
-export default function FoodShop({ foods, points }) {
-  const [userPoints, setUserPoints] = useState(points);
+export default function FoodShop({ foods, groupPoints }) {
+  const [points, setPoints] = useState(groupPoints);
   const [flashMessage, setFlashMessage] = useState('');
 
   const handleBuy = (foodId, price) => {
-    if (userPoints < price) {
+    if (points < price) {
       setFlashMessage('ポイントが足りません😭');
       return;
     }
 
-    setUserPoints(prev => prev - price);
-    setFlashMessage('購入しました！🍙');
+    setPoints(prev => prev - price);
+    setFlashMessage('購入しました！');
 
     router.post(`/foods/buy/${foodId}`, {}, {
       onError: () => setFlashMessage('購入に失敗しました…💧'),
@@ -28,23 +28,24 @@ export default function FoodShop({ foods, points }) {
 
   return (
     <div className="relative p-8 min-h-screen bg-gradient-to-br from-green-100 to-yellow-100">
-      {/* ポイント表示 */}
-      <div className="absolute top-4 left-4 bg-yellow-200 px-4 py-2 rounded-xl shadow-md border border-yellow-400">
-        <span className="font-bold text-lg">💰 所持ポイント: {userPoints} pt</span>
+      {/* グループポイント表示（上部中央に移動＆強調） */}
+      <div className="fixed top-6 left-1/2 transform -translate-x-1/2 bg-yellow-200 px-6 py-3 rounded-2xl shadow-lg border-2 border-yellow-400 z-30 flex items-center gap-2">
+        <span className="font-extrabold text-2xl text-yellow-700">💰 グループポイント:</span>
+        <span className="font-bold text-2xl text-green-800">{points} pt</span>
       </div>
 
       {/* フラッシュメッセージ */}
       {flashMessage && (
-        <div className="absolute top-16 left-1/2 transform -translate-x-1/2 bg-white shadow-lg rounded-lg px-6 py-3 text-green-700 font-semibold border border-green-300 animate-bounce">
+        <div className="fixed top-24 left-1/2 transform -translate-x-1/2 bg-white shadow-lg rounded-lg px-6 py-3 text-green-700 font-semibold border border-green-300 animate-bounce z-30">
           {flashMessage}
         </div>
       )}
 
-      <h1 className="text-4xl font-extrabold mb-10 text-center text-green-800 drop-shadow">
+      <h1 className="text-4xl font-extrabold mb-10 text-center text-green-800 drop-shadow mt-20">
         🍄 ご飯ショップ 🍚
       </h1>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 mt-8">
         {foods.map(food => (
           <div
             key={food.id}
@@ -62,17 +63,17 @@ export default function FoodShop({ foods, points }) {
               所持数: {food.quantity || 0}
             </p>
 
-            {/* 購入ボタン: クリックすると group_foods.quantity が増え、ポイントが減る */}
+            {/* 購入ボタン: ポイントが足りている場合のみ有効化 */}
             <button
               className={`mt-3 w-full py-2 rounded-lg font-bold text-white shadow-md transition-all ${
-                userPoints >= food.price
+                points >= food.price
                   ? 'bg-yellow-500 hover:bg-yellow-600'
                   : 'bg-gray-400 cursor-not-allowed'
               }`}
               onClick={() => handleBuy(food.id, food.price)}
-              disabled={userPoints < food.price}
+              disabled={points < food.price}
             >
-              {userPoints >= food.price ? '買う' : 'ポイント不足'}
+              {points >= food.price ? '買う' : 'ポイント不足'}
             </button>
           </div>
         ))}

@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use App\Models\Food;
 use App\Models\Character;
 use App\Models\User;
+use App\Models\Dressing;
 use Illuminate\Support\Facades\DB;
 
 class ShopController extends Controller
@@ -95,5 +96,72 @@ class ShopController extends Controller
             'character_level' => $character->level,
             'leveled_up' => $leveledUp,
         ]);
+    }
+
+    // 服一覧取得API
+    public function dressings()
+    {
+        return response()->json([
+            'dressings' => Dressing::all(),
+        ]);
+    }
+
+    // グループ服購入API
+    public function buyDressing(Request $request)
+    {
+        $request->validate([
+            'dressing_id' => 'required|exists:dressings,id',
+            'group_id' => 'required|exists:groups,id',
+        ]);
+
+        $user = $request->user();
+        $dressing = Dressing::find($request->dressing_id);
+        $group = \App\Models\Group::find($request->group_id);
+
+        // グループのポイントが足りるか確認
+        if ($group->points < $dressing->price) {
+            return response()->json(['error' => 'グループのポイントが足りません'], 400);
+        }
+
+        // グループのポイントを減算
+        $group->points -= $dressing->price;
+        $group->save();
+
+        // 在庫加算
+        $groupDressing = DB::table('group_dressings')
+            ->where('group_id', $group->id)
+            ->where('dressing_id', $dressing->id)
+            ->first();
+        if ($groupDressing) {
+            DB::table('group_dressings')
+                ->where('id', $groupDressing->id)
+                ->update(['quantity' => $groupDressing->quantity + 1]);
+        } else {
+            DB::table('group_dressings')->insert([
+                'group_id' => $group->id,
+                'dressing_id' => $dressing->id,
+                'quantity' => 1,
+                'created_at' => now(),
+                'updated_at' => now(),
+            ]);
+        }
+
+        return response()->json(['message' => '服を購入しました', 'points' => $group->points]);
+    }
+
+    // グループが所持している服一覧API
+    public function groupDressings(Request $request)
+    {
+        $request->validate([
+            'group_id' => 'required|exists:groups,id',
+        ]);
+        $groupId = $request->group_id;
+        $dressings = DB::table('group_dressings')
+            ->join('dressings', 'group_dressings.dressing_id', '=', 'dressings.id')
+            ->where('group_dressings.group_id', $groupId)
+            ->where('group_dressings.quantity', '>', 0)
+            ->select('dressings.*', 'group_dressings.quantity')
+            ->get();
+        return response()->json(['dressings' => $dressings]);
     }
 }
