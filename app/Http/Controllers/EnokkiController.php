@@ -22,6 +22,7 @@ class EnokkiController extends Controller
         $user = Auth::user();
         $group = $user->group;
 
+
         // グループに未所属ならリダイレクト
         if (!$group) {
             return redirect()->route('groups.select');
@@ -86,7 +87,7 @@ class EnokkiController extends Controller
                 'level' => $character->level,
                 'current_points' => $character->current_points,
                 'points_to_next_level' => 10 - ($character->current_points % 10),
-                'image_url' => $character->image_url,
+                'image_url' => asset($character->image_path),
             ],
             'tasks' => $tasks,
         ]);

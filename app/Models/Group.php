@@ -19,6 +19,7 @@ class Group extends Model
     public function users()
     {
         return $this->hasMany(User::class, 'group_id');
+        
     }
 
     public function members()
@@ -30,4 +31,19 @@ class Group extends Model
     {
         return $this->hasOne(Character::class, 'group_id');
     }
-}
+    //　ご飯とのリレーション
+    public function groupFoods()
+    {
+        return $this->hasMany(GroupFood::class);
+    }
+
+    public function foods()
+    {
+        return $this->belongsToMany(Food::class, 'group_foods')->withPivot('quantity')->withTimestamps();
+    }
+
+    public function selectedDressing()
+    {
+        return $this->belongsTo(Dressing::class, 'selected_dressing_id');
+    }
+};
