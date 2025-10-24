@@ -8,6 +8,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use App\Models\Group;
+use App\Models\Character;
 
 class TaskController extends Controller
 {
@@ -60,7 +61,7 @@ class TaskController extends Controller
         return response()->json($task, 201);
     }
 
-    //  タスク完了（チェックでグループにポイント加算してタスクを削除する）
+    //  タスク完了（チェックでグループにポイント加算してタスクを削除・キャラの成長反映）
     public function complete(Request $request, Task $task)
     {
         $user = Auth::user();
@@ -75,19 +76,53 @@ class TaskController extends Controller
 
         DB::transaction(function () use ($task) {
             if (is_null($task->completed_at)) {
-                if ($task->group_id) {
-                    $group = Group::where('id', $task->group_id)->lockForUpdate()->first();
-                    if ($group) {
-                        $group->increment('points', 1);
+                $group = Group::where('id', $task->group_id)->lockForUpdate()->first();
+
+                if ($group) {
+                    $group->increment('points', 1);
+
+                    // グループに紐づくキャラクターをロックして取得
+                    $character = Character::where('group_id', $group->id)->lockForUpdate()->first();
+
+                    if ($character) {
+                        $attrs = $character->getAttributes();
+                        $threshold = 10;
+
+                        if (array_key_exists('current_points', $attrs)) {
+                            $character->current_points = (int) ($character->current_points ?? 0) + 1;
+                            if ($character->current_points >= $threshold) {
+                                $levelsGained = intdiv($character->current_points, $threshold);
+                                $character->level = (int) ($character->level ?? 0) + $levelsGained;
+                                $character->current_points = $character->current_points % $threshold;
+                            }
+                        } elseif (array_key_exists('experience', $attrs)) {
+                            $character->experience = (int) ($character->experience ?? 0) + 1;
+                            if ($character->experience >= $threshold) {
+                                $levelsGained = intdiv($character->experience, $threshold);
+                                $character->level = (int) ($character->level ?? 0) + $levelsGained;
+                                $character->experience = $character->experience % $threshold;
+                            }
+                        } else {
+                            // フォールバック：experience を使う
+                            $character->experience = (int) ($character->experience ?? 0) + 1;
+                            if ($character->experience >= $threshold) {
+                                $levelsGained = intdiv($character->experience, $threshold);
+                                $character->level = (int) ($character->level ?? 0) + $levelsGained;
+                                $character->experience = $character->experience % $threshold;
+                            }
+                        }
+
+                        $character->save();
                     }
                 }
+
+                // タスクを削除
                 $task->delete();
             }
         });
 
-        // Inertia リクエストなら一覧（enokki の show 等）へリダイレクトして再フェッチさせる
+        // Inertia リクエストなら元のページへリダイレクト（再フェッチ）
         if ($request->header('X-Inertia')) {
-            // 既知の enokki 表示ルート名があれば route('enokki.show', $groupId) に変更してください
             return redirect()->back()->with('success', 'タスクを完了しました');
         }
 
