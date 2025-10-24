@@ -20,6 +20,9 @@ export default function AppLayout({ children }) {
                         <Link href="/group-create" className="tab-button">
                             グループ作成
                         </Link>
+                        <Link href="/enokki" className="tab-button">
+                            ホーム
+                        </Link>
                         <Link
                             href={route("developer.index")}
                             className="tab-button"

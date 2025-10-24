@@ -76,7 +76,7 @@ export default function TasksIndex() {
                     {/* ここに左上の戻るボタンを追加 */}
                     <div className="mb-4">
                         <Link
-                            href="/dashboard" // ここを戻りたいリンクに変更する
+                            href="/enokki" // ここを戻りたいリンクに変更する
                             className="inline-flex items-center gap-2 bg-white/90 border border-green-300 text-green-800 px-3 py-1 rounded shadow-sm hover:bg-white"
                         >
                             ← 戻る

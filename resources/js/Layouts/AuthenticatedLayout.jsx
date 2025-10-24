@@ -32,7 +32,7 @@ export default function AuthenticatedLayout({ header, children }) {
                                 </NavLink>
                                 <NavLink
                                     href={route("developer.index")}
-                                    active={route().current("v")}
+                                    active={route().current("developer.index")}
                                 >
                                     Developer
                                 </NavLink>
