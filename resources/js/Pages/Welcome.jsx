@@ -1,14 +1,21 @@
-import React from 'react';
-import AppLayout from '@/Layouts/AppLayout';
-import { Link, usePage, router } from '@inertiajs/react';
+import React from "react";
+import AppLayout from "@/Layouts/AppLayout";
+import { Link, usePage, router } from "@inertiajs/react";
 
-export default function Welcome({ canLogin, canRegister, laravelVersion, phpVersion }) {
+export default function Welcome({
+    canLogin,
+    canRegister,
+    laravelVersion,
+    phpVersion,
+}) {
     const { auth } = usePage().props;
 
     const handleDeleteAccount = () => {
-        const confirmed = confirm(`アカウントを本当に削除しますか？\nアカウント名: ${auth.user.name}`);
+        const confirmed = confirm(
+            `アカウントを本当に削除しますか？\nアカウント名: ${auth.user.name}`
+        );
         if (confirmed) {
-            router.delete(route('account.destroy'));
+            router.delete(route("account.destroy"));
         }
     };
 
@@ -31,16 +38,23 @@ export default function Welcome({ canLogin, canRegister, laravelVersion, phpVers
                 ))}
 
                 <div className="w-full max-w-2xl bg-white/80 backdrop-blur-md rounded-xl shadow-xl p-8 border border-green-300 z-10">
-                    <h1 className="text-4xl font-bold text-green-700 mb-6 text-center">エノッキーの森</h1>
+                    <h1 className="text-4xl font-bold text-green-700 mb-6 text-center">
+                        エノッキーの森
+                    </h1>
 
                     {auth.user ? (
                         <div className="text-center">
-                            <p className="mb-4 text-lg">ログイン中：<span className="font-semibold text-green-800">{auth.user.name}</span></p>
+                            <p className="mb-4 text-lg">
+                                ログイン中：
+                                <span className="font-semibold text-green-800">
+                                    {auth.user.name}
+                                </span>
+                            </p>
 
                             <div className="flex flex-col gap-4 items-center">
                                 {/* サインアウトボタン */}
                                 <Link
-                                    href={route('logout')}
+                                    href={route("logout")}
                                     method="post"
                                     as="button"
                                     className="bg-red-400 hover:bg-red-500 text-white font-semibold px-6 py-2 rounded-full shadow transition duration-300"
@@ -50,7 +64,7 @@ export default function Welcome({ canLogin, canRegister, laravelVersion, phpVers
 
                                 {/* グループ選択ボタン */}
                                 <Link
-                                    href={route('groups.select')}
+                                    href={route("groups.select")}
                                     className="bg-green-500 hover:bg-green-600 text-white font-semibold px-6 py-2 rounded-full shadow transition duration-300"
                                 >
                                     グループ選択
@@ -69,12 +83,18 @@ export default function Welcome({ canLogin, canRegister, laravelVersion, phpVers
                         <div className="text-center">
                             <div className="flex flex-col gap-4 items-center">
                                 {canLogin && (
-                                    <Link href={route('login')} className="text-green-700 underline hover:text-green-900 text-lg">
+                                    <Link
+                                        href={route("login")}
+                                        className="text-green-700 underline hover:text-green-900 text-lg"
+                                    >
                                         ログイン
                                     </Link>
                                 )}
                                 {canRegister && (
-                                    <Link href={route('register')} className="text-lime-600 underline hover:text-lime-800 text-lg">
+                                    <Link
+                                        href={route("register")}
+                                        className="text-lime-600 underline hover:text-lime-800 text-lg"
+                                    >
                                         新規登録
                                     </Link>
                                 )}
