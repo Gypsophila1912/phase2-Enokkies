@@ -18,7 +18,6 @@ class TaskController extends Controller
         $groupId = $request->query('group_id', $user?->group_id);
 
         if (! $groupId) {
-            // デバッグ用: グループ未設定なら空配列を返す前にログ出力
             logger()->warning('tasks index called without group_id', ['user_id' => $user?->id]);
             return Inertia::render('Tasks/Index', ['tasks' => [], 'tasks_count' => 0]);
         }
@@ -28,9 +27,12 @@ class TaskController extends Controller
             ->orderBy('created_at', 'desc')
             ->get();
 
+        $group = Group::select(['id','name','description','points'])->find($groupId);
+
         return Inertia::render('Tasks/Index', [
-            'tasks' => $tasks->toArray(), // 明示的に配列で渡す
+            'tasks' => $tasks->toArray(),
             'tasks_count' => $tasks->count(),
+            'group' => $group,
         ]);
     }
 
@@ -58,45 +60,38 @@ class TaskController extends Controller
         return response()->json($task, 201);
     }
 
-    //  タスク完了／未完了トグル
-    public function toggleComplete(Task $task)
+    //  タスク完了（チェックでグループにポイント加算してタスクを削除する）
+    public function complete(Request $request, Task $task)
     {
         $user = Auth::user();
 
-        // 所属チェック（ユーザーがそのグループのメンバーか）
+        // 所属チェック
         if ($task->group_id !== $user->group_id) {
+            if ($request->header('X-Inertia')) {
+                return redirect()->back()->with('error', 'Forbidden');
+            }
             return response()->json(['message' => 'Forbidden'], 403);
         }
 
-        // 現在の完了状態を判定
-        $wasCompleted = (bool) $task->completed_at;
-
-        DB::transaction(function () use ($task, $wasCompleted) {
-            if ($wasCompleted) {
-                // 未完了に戻す（ポイントは戻さない仕様）
-                $task->update(['completed_at' => null]);
-            } else {
-                // 完了にする
-                $task->update(['completed_at' => now()]);
-
-                // グループにポイントを付与（+1）
+        DB::transaction(function () use ($task) {
+            if (is_null($task->completed_at)) {
                 if ($task->group_id) {
                     $group = Group::where('id', $task->group_id)->lockForUpdate()->first();
                     if ($group) {
                         $group->increment('points', 1);
                     }
                 }
+                $task->delete();
             }
         });
 
-        // 最新の関連を読み直して返す
-        $task->load('user');
-
-        if (request()->header('X-Inertia')) {
-            return redirect()->route('tasks.index');
+        // Inertia リクエストなら一覧（enokki の show 等）へリダイレクトして再フェッチさせる
+        if ($request->header('X-Inertia')) {
+            // 既知の enokki 表示ルート名があれば route('enokki.show', $groupId) に変更してください
+            return redirect()->back()->with('success', 'タスクを完了しました');
         }
 
-        return response()->json($task);
+        return response()->json(['message' => 'deleted'], 200);
     }
 
     //  タスク削除
@@ -106,6 +101,9 @@ class TaskController extends Controller
 
         // 所属チェック（必要に応じて Policy に切り出し）
         if ($task->group_id !== $user->group_id) {
+            if (request()->header('X-Inertia')) {
+                return redirect()->back()->with('error', 'Forbidden');
+            }
             return response()->json(['message' => 'Forbidden'], 403);
         }
 
@@ -127,6 +125,9 @@ class TaskController extends Controller
 
         // 所属チェック（必要に応じて Policy に切り出し）
         if ($task->group_id !== $user->group_id) {
+            if ($request->header('X-Inertia')) {
+                return redirect()->back()->with('error', 'Forbidden');
+            }
             return response()->json(['message' => 'Forbidden'], 403);
         }
 

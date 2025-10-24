@@ -117,7 +117,7 @@ class GroupController extends Controller
             'name' => 'エノッキー',
             'level' => 1,
             'experience' => 0,
-            'image_path' => 'images/EnokkieImage.png',
+            'image_path' => '/images/EnokkieImage.png',
         ]);
 
         $user = Auth::user();

@@ -34,7 +34,7 @@ class AdmiringController extends Controller
                 'food_id' => $groupFood->food_id,
             ];
         });
-        
+
         return inertia('EnokkieAdmiringRoom/AdmiringRoom', [
             'character' => $character,
             'groupId' => $groupId,
@@ -42,22 +42,21 @@ class AdmiringController extends Controller
         ]);
     }
     
-    public function update(Request $request, $groupId)
-    {
-        $validated = $request->validate([
-            'personal_points' => 'required|integer|min:0',
-        ]);
-        
-        $user = auth()->user();
-        
-        DevGroupUser::where('devgroup_id', $groupId)
-            ->where('user_id', $user->id)
-            ->update([
-                'personal_points' => $validated['personal_points']
-            ]);
-        
-        return redirect()->back();
-    }
+public function update(Request $request)
+{
+    $user = auth()->user();
+    $groupId = $user->group_id;
+    
+    $validated = $request->validate([
+        'affection' => 'required|integer|min:0',
+    ]);
+    
+    Character::where('group_id', $groupId)
+        ->update(['affection' => $validated['affection']]);
+    
+    // 元のページにリダイレクト
+    return redirect()->route('admiring.index');
+}
 
     public function updateName(Request $request, $groupId)
     {
