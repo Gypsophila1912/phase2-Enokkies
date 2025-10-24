@@ -45,10 +45,12 @@ class GroupController extends Controller
     public function show($id)
     {
         $group = Group::with(['users', 'selectedDressing'])->findOrFail($id);
+        $character = Character::where('group_id', $group->id)->first();
         return Inertia::render('Group/Show', [
             'group' => $group,
             'users' => $group->users,
             'selectedDressing' => $group->selectedDressing,
+            'character' => $character,
         ]);
     }
 
@@ -118,7 +120,7 @@ class GroupController extends Controller
             'name' => 'エノッキー',
             'level' => 1,
             'experience' => 0,
-            'image_path' => 'public/images/EnokkieImage.png',
+            'image_path' => '/Enokkie/EnokkieImage.png',
         ]);
 
         $user = Auth::user();

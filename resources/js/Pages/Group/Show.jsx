@@ -1,19 +1,20 @@
 // resources/js/Pages/Group/Show.jsx
 
-import React from 'react';
-import { usePage, router } from '@inertiajs/react';
-import AppLayout from '@/Layouts/AppLayout';
+import React from "react";
+import { usePage, router } from "@inertiajs/react";
+import AppLayout from "@/Layouts/AppLayout";
 
 export default function Show() {
-    const { group, users, selectedDressing } = usePage().props;
+    const { group, users, selectedDressing, character } = usePage().props;
 
     // キャラクター画像パス
-    const characterImage = selectedDressing && selectedDressing.image_path
-        ? selectedDressing.image_path
-        : "/images/EnokkieImage.png";
+    const characterImage =
+        selectedDressing && selectedDressing.image_path
+            ? selectedDressing.image_path
+            : "/images/EnokkieImage.png";
 
     const joinGroup = (groupId) => {
-      router.post(route('groups.join', { id: groupId }));
+        router.post(route("groups.join", { id: groupId }));
     };
 
     return (
@@ -22,7 +23,7 @@ export default function Show() {
                 {/* キャラクターアイコン表示 */}
                 <div className="flex justify-center mb-6">
                     <img
-                        src={characterImage}
+                        src={character.image_url}
                         alt="エノッキー"
                         className="w-40 h-40 object-contain rounded-full border-4 border-green-300 shadow-lg bg-white/80 backdrop-blur-md"
                     />
@@ -44,18 +45,33 @@ export default function Show() {
                 ))}
 
                 <div className="w-full max-w-2xl bg-white/80 backdrop-blur-md rounded-xl shadow-xl p-8 border border-green-300 z-10">
-                    <h1 className="text-3xl font-bold text-green-700 mb-6 text-center">🌱 グループ詳細</h1>
+                    <h1 className="text-3xl font-bold text-green-700 mb-6 text-center">
+                        🌱 グループ詳細
+                    </h1>
 
                     <div className="bg-green-50 p-4 rounded-lg shadow mb-6">
-                        <p className="mb-2"><strong>グループ名:</strong> {group.name}</p>
-                        <p><strong>説明:</strong> {group.description ?? '（説明はまだありません）'}</p>
-                        <p><strong>グループポイント:</strong> {group.points ?? 0} pt</p>
+                        <p className="mb-2">
+                            <strong>グループ名:</strong> {group.name}
+                        </p>
+                        <p>
+                            <strong>説明:</strong>{" "}
+                            {group.description ?? "（説明はまだありません）"}
+                        </p>
+                        <p>
+                            <strong>グループポイント:</strong>{" "}
+                            {group.points ?? 0} pt
+                        </p>
                     </div>
 
-                    <h2 className="text-xl font-semibold text-green-600 mb-4">👥 メンバー一覧</h2>
+                    <h2 className="text-xl font-semibold text-green-600 mb-4">
+                        👥 メンバー一覧
+                    </h2>
                     <ul className="list-none mb-6">
-                        {users.map(user => (
-                            <li key={user.id} className="py-2 border-b border-gray-200">
+                        {users.map((user) => (
+                            <li
+                                key={user.id}
+                                className="py-2 border-b border-gray-200"
+                            >
                                 👤 {user.name}
                             </li>
                         ))}

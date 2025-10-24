@@ -19,8 +19,22 @@ class AdmiringController extends Controller
         $character = Character::where('group_id', $groupId)->first();
         
         // アイテム一覧（仮データ、後でDBから取得）
-        $items = [];
-        
+        $items = GroupFood::where('group_id', $groupId)
+        ->where('quantity', '>', 0)
+        ->with('food')
+        ->get()
+        ->map(function ($groupFood) {
+            return [
+                'id' => $groupFood->id,
+                'name' => $groupFood->food->name,
+                'image_path' => $groupFood->food->image_path,
+                'points' => $groupFood->food->exp_points,
+                'quantity' => $groupFood->quantity,
+                'rarity' => $groupFood->rarity,
+                'food_id' => $groupFood->food_id,
+            ];
+        });
+
         return inertia('EnokkieAdmiringRoom/AdmiringRoom', [
             'character' => $character,
             'groupId' => $groupId,
@@ -28,21 +42,20 @@ class AdmiringController extends Controller
         ]);
     }
     
-    public function update(Request $request, $groupId)
+    public function update(Request $request)
     {
+        $user = auth()->user();
+        $groupId = $user->group_id;
+        
         $validated = $request->validate([
-            'personal_points' => 'required|integer|min:0',
+            'affection' => 'required|integer|min:0',
         ]);
         
-        $user = auth()->user();
+        Character::where('group_id', $groupId)
+            ->update(['affection' => $validated['affection']]);
         
-        DevGroupUser::where('devgroup_id', $groupId)
-            ->where('user_id', $user->id)
-            ->update([
-                'personal_points' => $validated['personal_points']
-            ]);
-        
-        return redirect()->back();
+        // 元のページにリダイレクト
+        return redirect()->route('admiring.index');
     }
 
     public function updateName(Request $request, $groupId)
@@ -51,19 +64,39 @@ class AdmiringController extends Controller
             'name' => 'required|string|max:20',
         ]);
         
-        // 対象キャラクターを取得してから保存する
-        $character = Character::where('group_id', $groupId)->first();
-        if (! $character) {
-            return response()->json(['success' => false, 'message' => 'Character not found'], 404);
-        }
+        // 対象キャラクターを取得
+        $character = Character::where('group_id', $groupId)->firstOrFail();
 
         $character->name = $validated['name'];
-        $saved = $character->save();
+        $character->save();
 
-        if (! $saved) {
-            return response()->json(['success' => false, 'message' => 'Failed to save'], 500);
+        // 元のページ（エノッキーのお部屋）にリダイレクト
+        return redirect()->route('admiring.index'); // または適切なルート名に変更
+    }
+
+
+    public function useItem(Request $request)
+    {
+        $user = auth()->user();
+        $groupId = $user->group_id;
+
+        $request->validate([
+            'id' => 'required|integer',
+        ]);
+
+        $groupFood = GroupFood::where('group_id', $groupId)
+            ->findOrFail($request->id);
+
+        if ($groupFood->quantity > 0) {
+            $groupFood->decrement('quantity', 1);
         }
 
-        return response()->noContent();
+        $groupFood->refresh();
+
+        return response()->json([
+            'success' => true,
+            'quantity' => $groupFood->quantity,
+        ]);
     }
+
 }

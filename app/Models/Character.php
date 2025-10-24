@@ -16,8 +16,16 @@ class Character extends Model
         'level',
         'experience',
         'image_path',
+        'affection', 
     ];
 
+
+    protected $appends = ['image_url'];
+    
+    public function getImageUrlAttribute()
+    {
+        return asset($this->image_path);
+    }
     //グループ
     public function group()
     {

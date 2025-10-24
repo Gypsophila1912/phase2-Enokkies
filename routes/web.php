@@ -6,7 +6,6 @@ use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
-
 use App\Http\Controllers\GroupController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\EnokkiController; // ← 追加
@@ -16,6 +15,7 @@ use App\Http\Controllers\AdmiringController;
 use App\Http\Controllers\CharacterController;
 use App\Http\Controllers\DressingController;
 use App\Http\Controllers\ShopController;
+
 Route::get('/', function () {
     return Inertia::render('Welcome', [
         'canLogin' => Route::has('login'),
@@ -77,6 +77,8 @@ Route::middleware('auth')->group(function () {
     //enokkie admiring
     Route::get('/admiring', [AdmiringController::class, 'index'])->name('admiring.index');
     Route::patch('/enokkie/{groupId}/name', [AdmiringController::class, 'updateName'])->name('enokkie.updateName');
+    Route::patch('/admiring/update', [AdmiringController::class, 'update'])->name('admiring.update');
+    Route::patch('/group-foods/useItem', [AdmiringController::class, 'useItem'])->name('group-foods.use');
     //character dressing room
     Route::get('/character/dressing-room', [CharacterController::class, 'dressingRoom'])
     ->name('character.dressing-room')

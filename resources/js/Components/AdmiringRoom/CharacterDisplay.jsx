@@ -1,4 +1,4 @@
-export default function CharacterDisplay({ onDropItem, level = 1 }) {
+export default function CharacterDisplay({ character, onDropItem, level }) {
     const handleDrop = (e) => {
         e.preventDefault();
         const itemData = JSON.parse(e.dataTransfer.getData("item"));
@@ -15,7 +15,7 @@ export default function CharacterDisplay({ onDropItem, level = 1 }) {
                 className="relative bg-white/80 backdrop-blur-sm border border-green-300 rounded-2xl p-8 shadow-lg hover:shadow-xl transition-shadow duration-200"
             >
                 <img
-                    src="/images/EnokkieImage.png"
+                    src={character.image_url}
                     alt="Enokkie"
                     className="w-64 h-64 md:w-80 md:h-80 lg:w-96 lg:h-96 object-contain"
                 />
