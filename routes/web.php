@@ -10,10 +10,11 @@ use App\Http\Controllers\GroupController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\EnokkiController; // ← 追加
 use App\Http\Controllers\FoodController;
-use App\Http\Controllers\FoodGiveController;
 use App\Http\Controllers\TaskController;    // ← 追加
 use App\Http\Controllers\AdmiringController;
-
+use App\Http\Controllers\CharacterController;
+use App\Http\Controllers\DressingController;
+use App\Http\Controllers\ShopController;
 
 Route::get('/', function () {
     return Inertia::render('Welcome', [
@@ -76,6 +77,26 @@ Route::middleware('auth')->group(function () {
     //enokkie admiring
     Route::get('/admiring', [AdmiringController::class, 'index'])->name('admiring.index');
     Route::patch('/enokkie/{groupId}/name', [AdmiringController::class, 'updateName'])->name('enokkie.updateName');
+    Route::patch('/admiring/update', [AdmiringController::class, 'update'])->name('admiring.update');
+    Route::patch('/group-foods/useItem', [AdmiringController::class, 'useItem'])->name('group-foods.use');
+    //character dressing room
+    Route::get('/character/dressing-room', [CharacterController::class, 'dressingRoom'])
+    ->name('character.dressing-room')
+    ->middleware('auth');
+
+    
+
+    Route::get('/shop', [ShopController::class, 'index'])->name('shop.index');
+
+    Route::post('/dressings/buy/{id}', [DressingController::class, 'buy'])->name('dressings.buy');
+
+    // デバッグ用: ログインユーザーに500ポイント付与
+    Route::post('/debug/add-points', function () {
+        $user = auth()->user();
+        $user->point = 500;
+        $user->save();
+        return response()->json(['message' => '500ポイント付与しました', 'point' => $user->point]);
+    });
 });
 
 require __DIR__.'/auth.php';

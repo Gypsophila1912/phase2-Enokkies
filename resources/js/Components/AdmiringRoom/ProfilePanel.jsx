@@ -29,7 +29,7 @@ export default function ProfilePanel({
         return isNaN(num) ? 0 : num;
     };
 
-    const clampedAffection = Math.min(Math.max(affection, 0), 100);
+    const clampedAffection = affection;
 
     return (
         <div className="bg-white/80 backdrop-blur-sm border border-green-300 rounded-xl p-6 shadow-sm hover:shadow-md transition-shadow duration-200">
@@ -162,7 +162,7 @@ export default function ProfilePanel({
                                 {clampedAffection} / 100
                             </p>
                             <p className="text-xs text-gray-500 mt-1">
-                                {clampedAffection === 100
+                                {clampedAffection >= 100
                                     ? "最高の絆！💛"
                                     : `あと ${
                                           100 - clampedAffection

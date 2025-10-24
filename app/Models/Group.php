@@ -41,4 +41,9 @@ class Group extends Model
     {
         return $this->belongsToMany(Food::class, 'group_foods')->withPivot('quantity')->withTimestamps();
     }
+
+    public function selectedDressing()
+    {
+        return $this->belongsTo(Dressing::class, 'selected_dressing_id');
+    }
 };

@@ -42,21 +42,21 @@ class AdmiringController extends Controller
         ]);
     }
     
-public function update(Request $request)
-{
-    $user = auth()->user();
-    $groupId = $user->group_id;
-    
-    $validated = $request->validate([
-        'affection' => 'required|integer|min:0',
-    ]);
-    
-    Character::where('group_id', $groupId)
-        ->update(['affection' => $validated['affection']]);
-    
-    // 元のページにリダイレクト
-    return redirect()->route('admiring.index');
-}
+    public function update(Request $request)
+    {
+        $user = auth()->user();
+        $groupId = $user->group_id;
+        
+        $validated = $request->validate([
+            'affection' => 'required|integer|min:0',
+        ]);
+        
+        Character::where('group_id', $groupId)
+            ->update(['affection' => $validated['affection']]);
+        
+        // 元のページにリダイレクト
+        return redirect()->route('admiring.index');
+    }
 
     public function updateName(Request $request, $groupId)
     {
@@ -64,19 +64,39 @@ public function update(Request $request)
             'name' => 'required|string|max:20',
         ]);
         
-        // 対象キャラクターを取得してから保存する
-        $character = Character::where('group_id', $groupId)->first();
-        if (! $character) {
-            return response()->json(['success' => false, 'message' => 'Character not found'], 404);
-        }
+        // 対象キャラクターを取得
+        $character = Character::where('group_id', $groupId)->firstOrFail();
 
         $character->name = $validated['name'];
-        $saved = $character->save();
+        $character->save();
 
-        if (! $saved) {
-            return response()->json(['success' => false, 'message' => 'Failed to save'], 500);
+        // 元のページ（エノッキーのお部屋）にリダイレクト
+        return redirect()->route('admiring.index'); // または適切なルート名に変更
+    }
+
+
+    public function useItem(Request $request)
+    {
+        $user = auth()->user();
+        $groupId = $user->group_id;
+
+        $request->validate([
+            'id' => 'required|integer',
+        ]);
+
+        $groupFood = GroupFood::where('group_id', $groupId)
+            ->findOrFail($request->id);
+
+        if ($groupFood->quantity > 0) {
+            $groupFood->decrement('quantity', 1);
         }
 
-        return response()->noContent();
+        $groupFood->refresh();
+
+        return response()->json([
+            'success' => true,
+            'quantity' => $groupFood->quantity,
+        ]);
     }
+
 }

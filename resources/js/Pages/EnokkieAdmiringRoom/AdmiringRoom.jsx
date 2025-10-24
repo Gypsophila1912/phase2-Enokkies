@@ -1,45 +1,30 @@
 import AuthenticatedLayout from "@/Layouts/AppLayout";
 import { Head, router, Link } from "@inertiajs/react";
 import { useState } from "react";
+import axios from "axios"; // ← 追加
 import CharacterDisplay from "@/Components/AdmiringRoom/CharacterDisplay";
 import ProfilePanel from "@/Components/AdmiringRoom/ProfilePanel";
 import ItemInventory from "@/Components/AdmiringRoom/ItemInventory";
 
-export default function EnokkieHome({ groupId, character, items }) {
+export default function EnokkieHome({
+    groupId,
+    character,
+    items: initialItems,
+}) {
     const [afe, setafe] = useState(character.affection || 0);
     const [name, setName] = useState(character.name || "エノッキー");
+    const [items, setItems] = useState(initialItems);
 
-    const handleDropItem = (item) => {
-        console.log("=== handleDropItem called ===");
-        console.log("Item dropped:", item);
-        console.log("Current affection:", afe);
-
-        const newafe = afe + item.points;
-        console.log("New affection:", newafe);
-
-        setafe(newafe);
-
-        // routerを使って直接送信
-        console.log("Sending PATCH request...");
-        console.log("Route:", route("enokkie.update"));
-        console.log("Data:", { affection: newafe });
-
-        router.patch(
-            route("enokkie.update"),
-            { affection: newafe },
-            {
-                onSuccess: () => {
-                    console.log("✅ 親愛度更新成功！新しい値:", newafe);
-                    // リダイレクト後にページ遷移
-                    router.visit(route("enokkie.show"));
-                },
-                onError: (errors) => {
-                    console.error("❌ 親愛度更新エラー:", errors);
-                    // エラー時は元の値に戻す
-                    setafe(afe);
-                    alert("親愛度の更新に失敗しました");
-                },
-            }
+    // アイテム使用時に呼ぶ関数（個数を更新）
+    const handleItemUsed = (itemId, newQuantity) => {
+        setItems((prev) =>
+            prev
+                .map((item) =>
+                    item.id === itemId
+                        ? { ...item, quantity: newQuantity }
+                        : item
+                )
+                .filter((item) => item.quantity > 0)
         );
     };
 
@@ -61,6 +46,67 @@ export default function EnokkieHome({ groupId, character, items }) {
                 },
             }
         );
+    };
+
+    // ドラッグ&ドロップでアイテムを使用
+    const handleDropItem = async (item) => {
+        console.log("=== handleDropItem called ===", item);
+
+        const newafe = afe + item.points;
+        setafe(newafe);
+
+        // 親愛度更新
+        router.patch(
+            route("admiring.update"),
+            { affection: newafe },
+            {
+                preserveScroll: true,
+                onSuccess: () => console.log("✅ 親愛度更新成功！", newafe),
+                onError: () => setafe(afe),
+            }
+        );
+
+        // アイテム使用API呼び出し
+        try {
+            const response = await axios.patch("/group-foods/useItem", {
+                id: item.id,
+            });
+            handleItemUsed(item.id, response.data.quantity);
+        } catch (error) {
+            console.error("アイテム使用エラー:", error);
+            alert("アイテムの使用に失敗しました");
+        }
+    };
+
+    // クリックでアイテムを使用（ItemInventoryから呼ばれる）
+    const handleClickUseItem = async (itemId) => {
+        const item = items.find((i) => i.id === itemId);
+        if (!item) return;
+
+        const newafe = afe + item.points;
+        setafe(newafe);
+
+        // 親愛度更新
+        router.patch(
+            route("admiring.update"),
+            { affection: newafe },
+            {
+                preserveScroll: true,
+                onSuccess: () => console.log("✅ 親愛度更新成功！", newafe),
+                onError: () => setafe(afe),
+            }
+        );
+
+        // アイテム使用API呼び出し
+        try {
+            const response = await axios.patch("/group-foods/useItem", {
+                id: itemId,
+            });
+            handleItemUsed(itemId, response.data.quantity);
+        } catch (error) {
+            console.error("アイテム使用エラー:", error);
+            alert("アイテムの使用に失敗しました");
+        }
     };
 
     return (
@@ -95,7 +141,10 @@ export default function EnokkieHome({ groupId, character, items }) {
                             />
 
                             <div className="fixed bottom-0 left-0 right-0 z-50">
-                                <ItemInventory items={items} />
+                                <ItemInventory
+                                    items={items}
+                                    onItemUsed={handleClickUseItem}
+                                />
                             </div>
                         </div>
 

@@ -5,7 +5,6 @@ import AuthenticatedLayout from "@/Layouts/AppLayout";
 export default function Show({ auth }) {
     // props のデフォルト値を設定して undefined 回避
     const { group = {}, character = {}, tasks = [] } = usePage().props;
-
     // group.points が undefined / null / 非数 の場合に備えて安全に計算
     const groupPoints = Number(group?.points ?? 0);
     const pointsInCycle = ((groupPoints % 10) + 10) % 10; // 0-9 の範囲に正規化
@@ -31,6 +30,7 @@ export default function Show({ auth }) {
     return (
         <AuthenticatedLayout user={auth.user}>
             <Head title="エノッキー育成" />
+
             <div className="min-h-screen bg-gradient-to-br from-lime-200 via-green-100 to-green-300 px-6 py-10 font-sans text-gray-800 relative overflow-hidden">
                 {/* キラキラエフェクト */}
                 {[...Array(20)].map((_, i) => (
@@ -83,10 +83,10 @@ export default function Show({ auth }) {
                 <div className="flex justify-center mt-[80px]">
                     <div className="bg-white/80 backdrop-blur-md rounded-xl p-6 shadow-lg border border-green-400">
                         <img
-                            src="/images/EnokkieImage.png"
+                            src={character.image_url}
                             alt="エノッキー"
                             className="w-40 h-50 object-cover border-4 border-green-400"
-                        />{" "}
+                        />
                     </div>
                 </div>
 
@@ -112,17 +112,17 @@ export default function Show({ auth }) {
 
                     <div className="flex justify-center mt-8">
                         <div className="flex flex-row gap-4">
-                            <Link href="#">
+                            <Link href={route("admiring.index")}>
                                 <button className="bg-green-300 hover:bg-green-400 text-white font-bold py-2 px-4 rounded-full shadow">
                                     🏠 エノッキーの部屋
                                 </button>
                             </Link>
-                            <Link href="#">
+                            <Link href="/food-shop">
                                 <button className="bg-yellow-300 hover:bg-yellow-400 text-white font-bold py-2 px-4 rounded-full shadow">
                                     🛍 ショップ
                                 </button>
                             </Link>
-                            <Link href="#">
+                            <Link href={route("character.dressing-room")}>
                                 <button className="bg-pink-300 hover:bg-pink-400 text-white font-bold py-2 px-4 rounded-full shadow">
                                     🎁 ごはんをあげる
                                 </button>

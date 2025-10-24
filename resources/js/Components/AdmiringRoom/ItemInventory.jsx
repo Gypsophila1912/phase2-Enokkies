@@ -1,17 +1,24 @@
 import { useState } from "react";
 import { ChevronUp, ChevronDown } from "lucide-react";
 
-export default function ItemInventory({ items }) {
+export default function ItemInventory({ items, onItemUsed }) {
     const [isOpen, setIsOpen] = useState(true);
 
     const handleDragStart = (e, item) => {
         e.dataTransfer.setData("item", JSON.stringify(item));
     };
 
+    const handleUseItem = (itemId) => {
+        // 親コンポーネントに処理を委譲
+        if (onItemUsed) {
+            onItemUsed(itemId);
+        }
+    };
+
     return (
         <div className="mt-6 w-full px-6">
             <div className="bg-white/80 backdrop-blur-sm border border-green-300 rounded-xl shadow-inner overflow-hidden">
-                {/* ヘッダー部分（クリックで開閉） */}
+                {/* ヘッダー部分 */}
                 <button
                     onClick={() => setIsOpen(!isOpen)}
                     className="w-full bg-green-100 hover:bg-green-200 transition-colors p-3 flex items-center justify-between border-b border-green-300"
@@ -26,10 +33,10 @@ export default function ItemInventory({ items }) {
                     )}
                 </button>
 
-                {/* アイテム一覧（開閉アニメーション付き） */}
+                {/* アイテム一覧 */}
                 <div
                     className={`transition-all duration-300 ease-in-out ${
-                        isOpen ? "max-h-32 opacity-100" : "max-h-0 opacity-0"
+                        isOpen ? "max-h-40 opacity-100" : "max-h-0 opacity-0"
                     }`}
                 >
                     <div className="p-4">
@@ -42,8 +49,13 @@ export default function ItemInventory({ items }) {
                                         onDragStart={(e) =>
                                             handleDragStart(e, item)
                                         }
-                                        className="border border-green-200 rounded-lg p-3 min-w-[80px] flex flex-col items-center justify-center bg-white hover:bg-green-50 cursor-grab active:cursor-grabbing transition-colors"
+                                        onClick={() => handleUseItem(item.id)}
+                                        className="relative border border-green-200 rounded-lg p-3 min-w-[80px] flex flex-col items-center justify-center bg-white hover:bg-green-50 cursor-pointer transition-colors"
                                     >
+                                        <span className="absolute top-1 right-1 bg-green-200 text-green-800 text-[10px] font-bold px-1.5 py-0.5 rounded-full shadow-sm">
+                                            ×{item.quantity}
+                                        </span>
+
                                         <img
                                             src={item.image_path}
                                             alt={item.name}

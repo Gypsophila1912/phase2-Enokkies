@@ -44,10 +44,13 @@ class GroupController extends Controller
      */
     public function show($id)
     {
-        $group = Group::with('users')->findOrFail($id);
+        $group = Group::with(['users', 'selectedDressing'])->findOrFail($id);
+        $character = Character::where('group_id', $group->id)->first();
         return Inertia::render('Group/Show', [
             'group' => $group,
             'users' => $group->users,
+            'selectedDressing' => $group->selectedDressing,
+            'character' => $character,
         ]);
     }
 
@@ -117,7 +120,7 @@ class GroupController extends Controller
             'name' => 'エノッキー',
             'level' => 1,
             'experience' => 0,
-            'image_path' => '/images/EnokkieImage.png',
+            'image_path' => '/Enokkie/EnokkieImage.png',
         ]);
 
         $user = Auth::user();
@@ -157,5 +160,49 @@ class GroupController extends Controller
             'message' => "グループ {$group->name} に {$amount} ポイントを追加しました。",
             'points' => $group->points,
         ]);
+    }
+
+    /**
+     * グループに500ポイント追加するAPI
+     * @param \Illuminate\Http\Request $request
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function add500Points(Request $request)
+    {
+        $request->validate([
+            'group_id' => 'required|exists:groups,id',
+        ]);
+        $group = Group::findOrFail($request->group_id);
+        $group->increment('points', 500);
+        return response()->json([
+            'message' => "グループ {$group->name} に500ポイント追加しました。",
+            'points' => $group->points,
+        ]);
+    }
+
+    // グループの選択中の服を取得
+    public function getSelectedDressing(Request $request)
+    {
+        $request->validate([
+            'group_id' => 'required|exists:groups,id',
+        ]);
+        $group = Group::with('selectedDressing')->find($request->group_id);
+        return response()->json([
+            'selected_dressing_id' => $group->selected_dressing_id,
+            'selected_dressing' => $group->selectedDressing,
+        ]);
+    }
+
+    // グループの服選択を更新
+    public function selectDressing(Request $request)
+    {
+        $request->validate([
+            'group_id' => 'required|exists:groups,id',
+            'dressing_id' => 'nullable|exists:dressings,id',
+        ]);
+        $group = Group::find($request->group_id);
+        $group->selected_dressing_id = $request->dressing_id;
+        $group->save();
+        return response()->json(['message' => '服を変更しました']);
     }
 }
