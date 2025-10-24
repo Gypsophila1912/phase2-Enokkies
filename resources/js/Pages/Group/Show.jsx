@@ -5,7 +5,12 @@ import { usePage, router } from '@inertiajs/react';
 import AppLayout from '@/Layouts/AppLayout';
 
 export default function Show() {
-    const { group, users } = usePage().props;
+    const { group, users, selectedDressing } = usePage().props;
+
+    // キャラクター画像パス
+    const characterImage = selectedDressing && selectedDressing.image_path
+        ? selectedDressing.image_path
+        : "/images/EnokkieImage.png";
 
     const joinGroup = (groupId) => {
       router.post(route('groups.join', { id: groupId }));
@@ -14,7 +19,15 @@ export default function Show() {
     return (
         <AppLayout>
             <div className="min-h-screen bg-gradient-to-br from-lime-200 via-green-100 to-green-300 flex flex-col items-center justify-center font-sans text-gray-800 relative overflow-hidden px-4 py-10">
-                
+                {/* キャラクターアイコン表示 */}
+                <div className="flex justify-center mb-6">
+                    <img
+                        src={characterImage}
+                        alt="エノッキー"
+                        className="w-40 h-40 object-contain rounded-full border-4 border-green-300 shadow-lg bg-white/80 backdrop-blur-md"
+                    />
+                </div>
+
                 {/* キラキラエフェクト */}
                 {[...Array(15)].map((_, i) => (
                     <div
@@ -36,6 +49,7 @@ export default function Show() {
                     <div className="bg-green-50 p-4 rounded-lg shadow mb-6">
                         <p className="mb-2"><strong>グループ名:</strong> {group.name}</p>
                         <p><strong>説明:</strong> {group.description ?? '（説明はまだありません）'}</p>
+                        <p><strong>グループポイント:</strong> {group.points ?? 0} pt</p>
                     </div>
 
                     <h2 className="text-xl font-semibold text-green-600 mb-4">👥 メンバー一覧</h2>

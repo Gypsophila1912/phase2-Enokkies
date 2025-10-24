@@ -10,6 +10,11 @@ use Inertia\Inertia;
 
 class GroupController extends Controller
 {
+    /**
+     * グループ一覧を表示する
+     *
+     * @return \Inertia\Response
+     */
     public function index()
     {
         $groups = Group::all(); // ← 修正済み
@@ -18,6 +23,11 @@ class GroupController extends Controller
         ]);
     }
 
+    /**
+     * グループ選択画面を表示する
+     *
+     * @return \Inertia\Response
+     */
     public function select()
     {
         $groups = Group::withCount('users')->get();
@@ -26,15 +36,29 @@ class GroupController extends Controller
         ]);
     }
 
+    /**
+     * 指定したグループの詳細と参加ユーザーを表示する
+     *
+     * @param int $id グループID
+     * @return \Inertia\Response
+     */
     public function show($id)
     {
-        $group = Group::with('users')->findOrFail($id);
+        $group = Group::with(['users', 'selectedDressing'])->findOrFail($id);
         return Inertia::render('Group/Show', [
             'group' => $group,
             'users' => $group->users,
+            'selectedDressing' => $group->selectedDressing,
         ]);
     }
 
+    /**
+     * グループに参加する処理を行う
+     *
+     * @param \Illuminate\Http\Request $request
+     * @param int|null $id グループID（URLパラメータまたはリクエストから取得）
+     * @return \Illuminate\Http\RedirectResponse
+     */
    public function join(Request $request, $id)
     {
         $groupId = $id ?? $request->input('group_id');
@@ -60,11 +84,22 @@ class GroupController extends Controller
             ->with('message', 'グループに参加しました！');
     }
 
+    /**
+     * グループ作成画面を表示する
+     *
+     * @return \Inertia\Response
+     */
     public function create()
     {
         return Inertia::render('Group/Create');
     }
 
+    /**
+     * 新しいグループを作成し、初期キャラクターとユーザーのグループ設定を行う
+     *
+     * @param \Illuminate\Http\Request $request
+     * @return \Illuminate\Http\RedirectResponse
+     */
     public function store(Request $request)
     {
         $validated = $request->validate([
@@ -93,11 +128,79 @@ class GroupController extends Controller
         return redirect()->route('groups.show', $group->id);
     }
 
+    /**
+     * 指定したグループを削除する
+     *
+     * @param int $id グループID
+     * @return \Illuminate\Http\RedirectResponse
+     */
     public function destroy($id)
     {
         $group = Group::findOrFail($id);
         $group->delete();
 
         return redirect('/group-select')->with('message', 'グループを削除しました');
+    }
+
+    /**
+     * テスト用: 指定したグループにポイントを追加する
+     * 
+     * @param int $groupId 対象のグループID
+     * @param int $amount 追加するポイント
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function addTestPoints($groupId, $amount)
+    {
+        $group = Group::findOrFail($groupId);
+        $group->increment('points', $amount);
+
+        return response()->json([
+            'message' => "グループ {$group->name} に {$amount} ポイントを追加しました。",
+            'points' => $group->points,
+        ]);
+    }
+
+    /**
+     * グループに500ポイント追加するAPI
+     * @param \Illuminate\Http\Request $request
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function add500Points(Request $request)
+    {
+        $request->validate([
+            'group_id' => 'required|exists:groups,id',
+        ]);
+        $group = Group::findOrFail($request->group_id);
+        $group->increment('points', 500);
+        return response()->json([
+            'message' => "グループ {$group->name} に500ポイント追加しました。",
+            'points' => $group->points,
+        ]);
+    }
+
+    // グループの選択中の服を取得
+    public function getSelectedDressing(Request $request)
+    {
+        $request->validate([
+            'group_id' => 'required|exists:groups,id',
+        ]);
+        $group = Group::with('selectedDressing')->find($request->group_id);
+        return response()->json([
+            'selected_dressing_id' => $group->selected_dressing_id,
+            'selected_dressing' => $group->selectedDressing,
+        ]);
+    }
+
+    // グループの服選択を更新
+    public function selectDressing(Request $request)
+    {
+        $request->validate([
+            'group_id' => 'required|exists:groups,id',
+            'dressing_id' => 'nullable|exists:dressings,id',
+        ]);
+        $group = Group::find($request->group_id);
+        $group->selected_dressing_id = $request->dressing_id;
+        $group->save();
+        return response()->json(['message' => '服を変更しました']);
     }
 }

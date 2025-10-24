@@ -9,7 +9,7 @@ export default function Index({ devGroups }) {
     return (
         <AuthenticatedLayout>
             <Head title="開発者モード" />
-            <div className="min-h-screen bg-gradient-to-br from-lime-200 via-green-100 to-green-300 px-4 py-10 font-sans text-gray-800 relative overflow-hidden">
+            <div className="bg-gradient-to-br from-lime-200 via-green-100 to-green-300 px-4 py-10 font-sans text-gray-800 relative overflow-hidden">
                 {/* キラキラエフェクト（上部に限定） */}
                 {[...Array(15)].map((_, i) => (
                     <div

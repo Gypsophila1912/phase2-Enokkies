@@ -15,9 +15,23 @@ export default function Show({ auth }) {
   const charPointsInCycle = ((charCurrent % 10) + 10) % 10;
   const charProgressPercent = charPointsInCycle * 10;
 
-  return (
-    <AuthenticatedLayout user={auth.user}>
-      <Head title="エノッキー育成" />
+    // エノっキーにご飯をあげる処理
+    const handleFeed = (foodId) => {
+        router.post(
+            route("feed-enokki.feed"),
+            { food_id: foodId },
+            {
+                onSuccess: () => {
+                    setShowModal(false); // モーダル閉じる
+                },
+            }
+        );
+    };
+
+
+    return (
+        <AuthenticatedLayout user={auth.user}>
+            <Head title="エノッキー育成" />
 
       <div className="min-h-screen bg-gradient-to-br from-lime-200 via-green-100 to-green-300 px-6 py-10 font-sans text-gray-800 relative overflow-hidden">
 
@@ -95,12 +109,12 @@ export default function Show({ auth }) {
                   🏠 エノッキーの部屋
                 </button>
               </Link>
-              <Link href="#">
+              <Link href="/food-shop">
                 <button className="bg-yellow-300 hover:bg-yellow-400 text-white font-bold py-2 px-4 rounded-full shadow">
                   🛍 ショップ
                 </button>
               </Link>
-              <Link href="#">
+              <Link href={route('character.dressing-room')}>
                 <button className="bg-pink-300 hover:bg-pink-400 text-white font-bold py-2 px-4 rounded-full shadow">
                   🎁 ごはんをあげる
                 </button>
@@ -171,6 +185,7 @@ export default function Show({ auth }) {
         {/* キラキラアニメーション用スタイル */}
         <style>
           {`
+>>>>>>> origin/develop
             .sparkle {
               animation: sparkle 1.5s infinite;
               pointer-events: none;
@@ -182,8 +197,8 @@ export default function Show({ auth }) {
               100% { opacity: 0.2; transform: scale(1); }
             }
           `}
-        </style>
-      </div>
-    </AuthenticatedLayout>
-  );
+                </style>
+            </div>
+        </AuthenticatedLayout>
+    );
 }
