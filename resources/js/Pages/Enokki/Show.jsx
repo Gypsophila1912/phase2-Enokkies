@@ -85,7 +85,7 @@ export default function Show({ auth }) {
             
 
             <h2 className="text-md font-bold text-purple-700 mb-2">💬 今日のひとこと</h2>
-            <p className="text-sm">「好きな色はみどり！」</p>
+            <p className="text-sm">{group.dailyMessage}</p>
           </div>
 
           <div className="flex justify-center mt-8">
