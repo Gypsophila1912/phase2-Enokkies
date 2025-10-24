@@ -91,6 +91,14 @@ export default function Show({ auth }) {
                 }}>
             </div>
 
+            <h2 className="text-md font-bold text-purple-700 mb-2">💬 今日のひとこと</h2>
+            <p className="text-sm">{group.dailyMessage}</p>
+          </div>
+
+         
+
+          {/* タスク一覧 */}
+          <div className="lg:col-span-2 bg-yellow-100/80 backdrop-blur-md rounded-xl p-6 shadow-lg border border-yellow-300 overflow-auto max-h-[400px]">
 
                     <div className="flex justify-center mt-8">
                         <div className="flex flex-row gap-4">
