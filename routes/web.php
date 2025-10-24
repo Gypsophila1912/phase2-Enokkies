@@ -15,10 +15,7 @@ use App\Http\Controllers\TaskController;    // ← 追加
 use App\Http\Controllers\AdmiringController;
 use App\Http\Controllers\CharacterController;
 use App\Http\Controllers\DressingController;
-
-
-
-
+use App\Http\Controllers\ShopController;
 Route::get('/', function () {
     return Inertia::render('Welcome', [
         'canLogin' => Route::has('login'),
@@ -86,6 +83,8 @@ Route::middleware('auth')->group(function () {
     ->middleware('auth');
 
     
+
+    Route::get('/shop', [ShopController::class, 'index'])->name('shop.index');
 
     Route::post('/dressings/buy/{id}', [DressingController::class, 'buy'])->name('dressings.buy');
 

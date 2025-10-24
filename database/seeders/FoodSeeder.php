@@ -53,8 +53,56 @@ class FoodSeeder extends Seeder
             [
                 'name'=>'黄金のエノキ鍋',
                 'price'=>1000,
-                'image_path'=>'/food/golden_nabe.png',
+                'image_path'=>'/food/nabe.png',
                 'rarity'=>'super_rare',
+            ],
+            [
+                'name' => 'クレープ',
+                'price' => 70,
+                'image_path' => '/food/crepe.png',
+                'rarity' => 'rare',
+            ], 
+            [
+                'name' => '焼肉',
+                'price' => 300,
+                'image_path' => '/food/meat.png',
+                'rarity' => 'super_rare',
+            ],
+            [
+                'name' => 'お好み焼き',
+                'price' => 30,
+                'image_path' => '/food/okonomiyaki.png',
+                'rarity' => 'common',
+            ],
+            [
+                'name' => 'みかん',
+                'price' => 20,
+                'image_path' => '/food/orange.png',
+                'rarity' => 'common',
+            ],
+            [
+                'name' => 'パスタ',
+                'price' => 30,
+                'image_path' => '/food/pasta.png',
+                'rarity' => 'common',
+            ],
+            [
+                'name' => 'ラーメン',
+                'price' => 90,
+                'image_path' => '/food/ramen.png',
+                'rarity' => 'rare',
+            ],
+            [
+                'name' => 'さば定食',
+                'price' => 120,
+                'image_path' => '/food/saba.png',
+                'rarity' => 'rare',
+            ],
+            [
+                'name' => 'ショートケーキ',
+                'price' => 400,
+                'image_path' => '/food/short.png',
+                'rarity' => 'super_rare',
             ],
         ]);
     }

@@ -4,10 +4,10 @@ import AuthenticatedLayout from "@/Layouts/AppLayout";
 
 export default function DressingRoom({ auth }) {
     const groupId = auth.user.group_id || 1;
-    const [selectedImage, setSelectedImage] = useState("/images/EnokkieImage.png");
+    const [selectedImage, setSelectedImage] = useState("/dressings/EnokkieImage.png");
     const [showClothes, setShowClothes] = useState(false);
     const [showBackgrounds, setShowBackgrounds] = useState(false);
-    const [selectedBackground, setSelectedBackground] = useState("/images/room_background.png");
+    const [selectedBackground, setSelectedBackground] = useState("/dressings/room_background.png");
     const [clothesOptions, setClothesOptions] = useState([]);
     const [loadingClothes, setLoadingClothes] = useState(false);
 
@@ -36,11 +36,11 @@ export default function DressingRoom({ auth }) {
                 if (data.selected_dressing?.image_path) {
                     setSelectedImage(data.selected_dressing.image_path);
                 } else {
-                    setSelectedImage("/images/EnokkieImage.png");
+                    setSelectedImage("/dressings/en.png");
                 }
             }
         } catch {
-            setSelectedImage("/images/EnokkieImage.png");
+            setSelectedImage("/dressings/pumpkin.png");
         }
     };
 
@@ -94,7 +94,6 @@ export default function DressingRoom({ auth }) {
         "/Room/Fashionable.png",
         "/Room/kiRoom.png",
         "/Room/EnokkieRoom.png",
-        "/Room/NomalRoom.png",
     ];
 
     return (

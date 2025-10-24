@@ -8,14 +8,39 @@ use App\Models\Character;
 use App\Models\User;
 use App\Models\Dressing;
 use Illuminate\Support\Facades\DB;
+use Inertia\Inertia;
 
 class ShopController extends Controller
 {
-    // ご飯一覧取得API
-    public function index()
+    // ご飯・服一覧取得API (FoodShop)
+    public function index(Request $request)
     {
-        return response()->json([
-            'foods' => Food::all(),
+        $groupId = $request->query('group_id', 1);
+
+        // ご飯一覧の取得（カテゴリ: food）
+        $foods = \DB::table('foods')->get()->map(function ($food) {
+            $food->category = 'food';
+            if (!str_starts_with($food->image_path, '/food/')) {
+                $food->image_path = '/food/' . ltrim($food->image_path, '/');
+            }
+            return $food;
+        });
+
+        // 服一覧の取得（カテゴリ: dressing）
+        $dressings = Dressing::all();
+            
+        
+
+        // ご飯と服を統合して返す
+        $merged = $foods->concat($dressings)->values();
+
+        // グループのポイント取得
+        $groupPoints = \DB::table('groups')->where('id', $groupId)->value('points') ?? 0;
+        dd($merged->toArray());
+        return Inertia::render('FoodShop', [
+            'foods' => $merged,
+            'groupPoints' => $groupPoints,
+            'dressings' => $dressings,
         ]);
     }
 
@@ -133,18 +158,16 @@ class ShopController extends Controller
             ->where('dressing_id', $dressing->id)
             ->first();
         if ($groupDressing) {
-            DB::table('group_dressings')
-                ->where('id', $groupDressing->id)
-                ->update(['quantity' => $groupDressing->quantity + 1]);
-        } else {
-            DB::table('group_dressings')->insert([
-                'group_id' => $group->id,
-                'dressing_id' => $dressing->id,
-                'quantity' => 1,
-                'created_at' => now(),
-                'updated_at' => now(),
-            ]);
+            return response()->json(['error' => 'この服は既に購入済みです'], 400);
         }
+
+        DB::table('group_dressings')->insert([
+            'group_id' => $group->id,
+            'dressing_id' => $dressing->id,
+            'quantity' => 1,
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]);
 
         return response()->json(['message' => '服を購入しました', 'points' => $group->points]);
     }

@@ -8,10 +8,11 @@ return new class extends Migration
 {
     public function up(): void
     {
+        Schema::disableForeignKeyConstraints();
         Schema::create('user_foods', function (Blueprint $table) {
             $table->id();
             $table->foreignId('user_id')->constrained()->onDelete('cascade');
-            $table->foreignId('food_id')->constrained()->onDelete('cascade');
+            $table->foreignId('food_id')->constrained('foods')->onDelete('cascade');
             $table->integer('quantity')->default(0);
             $table->timestamps();
         });

@@ -3,7 +3,7 @@
 namespace Database\Seeders;
 
 use Illuminate\Database\Seeder;
-use Illuminate\Support\Facades\DB;
+use App\Models\Dressing;
 
 class DressingSeeder extends Seeder
 {
@@ -12,30 +12,30 @@ class DressingSeeder extends Seeder
      */
     public function run(): void
     {
-        DB::table('dressings')->insert([
-                        [
+        Dressing::insert([
+            [
                 'name' => 'ベビエノっキー',
                 'price' => 250,
-                'image_path' => './Eno/baby.png',
+                'image_path' => '/dressings/baby.png',
                 'rarity' => 'super_rare',
             ],
             [
                 'name' => 'エンジニアエノっキー',
                 'price' => 250,
-                'image_path' => './Eno/en.png',
+                'image_path' => '/dressings/en.png',
                 'rarity' => 'rare',
             ],
             
             [
                 'name' => 'パンプキンエノッキー',
                 'price' => 300,
-                'image_path' => './Eno/pumpkin.png',
+                'image_path' => '/dressings/pumpkin.png',
                 'rarity' => 'super_rare',
             ],
             [
                 'name' => 'サイヤエノッキー',
                 'price' => 500,
-                'image_path' => './Eno/saiya.png',
+                'image_path' => '/dressings/saiya.png',
                 'rarity' => 'super_rare',
             ],
             // 必要に応じて追加

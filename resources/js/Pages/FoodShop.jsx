@@ -1,34 +1,46 @@
 import React, { useState, useEffect } from 'react';
 import { Link, router } from '@inertiajs/react';
 
-export default function FoodShop({ foods, groupPoints }) {
+export default function FoodShop({ foods, groupPoints ,dressings=[]}) {
   const [points, setPoints] = useState(groupPoints);
   const [flashMessage, setFlashMessage] = useState('');
+  const [quantities, setQuantities] = useState(() => {
+    const initial = {};
+    foods.forEach(item => {
+      initial[item.id] = item.quantity || 0;
+    });
+    return initial;
+  });
+  console.log(dressings);
 
-  const handleBuy = (foodId, price, category) => {
+  const handleBuy = (id, price, category) => {
     if (points < price) {
       setFlashMessage('ポイントが足りません😭');
       return;
     }
 
+    // 洋服は一着しか買えない
+    if (category === 'dressing' && quantities[id] > 0) {
+      setFlashMessage('この服は既に購入済みです👕');
+      return;
+    }
+
     setPoints(prev => prev - price);
 
-    // foodとdressingは同じショップUIを使うが、購入APIは異なるエンドポイントを呼び出す
-    if (category === 'dressing') {
-      router.post(`/dressings/buy/${foodId}`, {}, {
-        onSuccess: () => {
+    const endpoint = category === 'dressing' ? `/dressings/buy/${id}` : `/foods/buy/${id}`;
+    router.post(endpoint, {}, {
+      onSuccess: () => {
+        if (category === 'dressing') {
           setFlashMessage('服を購入しました👕✨');
-          // DressingRoom コンポーネントに服一覧更新を知らせるイベントを発火
-          window.dispatchEvent(new CustomEvent('updateDressingList'));
-        },
-        onError: () => setFlashMessage('購入に失敗しました…💧'),
-      });
-    } else {
-      router.post(`/foods/buy/${foodId}`, {}, {
-        onSuccess: () => setFlashMessage('購入しました！'),
-        onError: () => setFlashMessage('購入に失敗しました…💧'),
-      });
-    }
+          window.dispatchEvent(new Event('dressing-added'));
+          setQuantities(prev => ({ ...prev, [id]: 1 }));
+        } else {
+          setFlashMessage('ご飯を購入しました🍚');
+          setQuantities(prev => ({ ...prev, [id]: (prev[id] || 0) + 1 }));
+        }
+      },
+      onError: () => setFlashMessage('購入に失敗しました…💧'),
+    });
   };
 
   useEffect(() => {
@@ -40,7 +52,7 @@ export default function FoodShop({ foods, groupPoints }) {
 
   return (
     <div className="relative p-8 min-h-screen bg-gradient-to-br from-green-100 to-yellow-100">
-      {/* グループポイント表示（上部中央に移動＆強調） */}
+      {/* グループポイント表示 */}
       <div className="fixed top-6 left-1/2 transform -translate-x-1/2 bg-yellow-200 px-6 py-3 rounded-2xl shadow-lg border-2 border-yellow-400 z-30 flex items-center gap-2">
         <span className="font-extrabold text-2xl text-yellow-700">💰 グループポイント:</span>
         <span className="font-bold text-2xl text-green-800">{points} pt</span>
@@ -54,49 +66,60 @@ export default function FoodShop({ foods, groupPoints }) {
       )}
 
       <h1 className="text-4xl font-extrabold mb-10 text-center text-green-800 drop-shadow mt-20">
-        🍄 ご飯ショップ 🍚
+        🍄 ご飯＆服ショップ 👕
       </h1>
 
+      {/* 一覧表示 */}
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 mt-8">
-        {foods.map(food => (
-          <div
-            key={food.id}
-            className="bg-white rounded-2xl shadow hover:shadow-lg transition-all p-4 text-center border border-gray-200 hover:-translate-y-1"
-          >
-            <img
-              src={food.image_path}
-              alt={food.name}
-              className="mx-auto w-24 h-24 mb-3 object-contain"
-            />
-            <p className="font-bold text-lg text-gray-800">{food.name}</p>
-            <p className="text-sm text-gray-600">💎 レアリティ: {food.rarity}</p>
-            <p className="text-lg font-semibold text-yellow-600 mt-2">{food.price} pt</p>
-            <p className="text-sm text-gray-500 mt-1">
-              所持数: {food.quantity || 0}
-            </p>
+        {foods.map(item => {
+          const isDressing = item.category === 'dressing';
+          const owned = quantities[item.id] > 0;
+          const canBuy = points >= item.price && (!isDressing || !owned);
 
-            {/* 購入ボタン: ポイントが足りている場合のみ有効化 */}
-            <button
-              className={`mt-3 w-full py-2 rounded-lg font-bold text-white shadow-md transition-all ${
-                points >= food.price
-                  ? 'bg-yellow-500 hover:bg-yellow-600'
-                  : 'bg-gray-400 cursor-not-allowed'
-              }`}
-              onClick={() => handleBuy(food.id, food.price, food.category)}
-              disabled={points < food.price}
+          return (
+            <div
+              key={item.id}
+              className="bg-white rounded-2xl shadow hover:shadow-lg transition-all p-4 text-center border border-gray-200 hover:-translate-y-1"
             >
-              {points >= food.price ? '買う' : 'ポイント不足'}
-            </button>
-          </div>
-        ))}
+              <img
+                src={item.image_path.startsWith('/') ? item.image_path : `/${item.image_path}`}
+                alt={item.name}
+                className="mx-auto w-24 h-24 mb-3 object-contain"
+              />
+              <p className="font-bold text-lg text-gray-800">{item.name}</p>
+              <p className="text-sm text-gray-600">💎 レアリティ: {item.rarity}</p>
+              <p className="text-lg font-semibold text-yellow-600 mt-2">{item.price} pt</p>
+              <p className="text-sm text-gray-500 mt-1">
+                所持数: {quantities[item.id] || 0}
+              </p>
+
+              {/* ボタン */}
+              {isDressing && owned ? (
+                <button className="mt-3 w-full py-2 rounded-lg font-bold text-white bg-gray-400 cursor-not-allowed shadow-md" disabled>
+                  売り切れ
+                </button>
+              ) : (
+                <button
+                  className={`mt-3 w-full py-2 rounded-lg font-bold text-white shadow-md transition-all ${
+                    canBuy ? 'bg-yellow-500 hover:bg-yellow-600' : 'bg-gray-400 cursor-not-allowed'
+                  }`}
+                  onClick={() => handleBuy(item.id, item.price, item.category)}
+                  disabled={!canBuy}
+                >
+                  {canBuy ? '買う' : 'ポイント不足'}
+                </button>
+              )}
+            </div>
+          );
+        })}
       </div>
 
-      <Link
-        href="/"
-        className="block mt-10 text-blue-700 text-lg font-semibold hover:underline text-center"
+      <button
+        onClick={() => window.history.back()}
+        className="block mt-10 mx-auto bg-green-300 hover:bg-green-400 text-white font-bold py-2 px-6 rounded-full shadow"
       >
         ← 戻る
-      </Link>
+      </button>
     </div>
   );
 }
