@@ -6,14 +6,23 @@ export default function Show({ auth }) {
   // props のデフォルト値を設定して undefined 回避
   const { group = {}, character = {}, tasks = [] } = usePage().props;
 
-  // group.points が undefined / null / 非数 の場合に備えて安全に計算
+  // group.points / character.current_points が未定義でも安全に扱う
   const groupPoints = Number(group?.points ?? 0);
-  const pointsInCycle = ((groupPoints % 10) + 10) % 10; // 0-9 の範囲に正規化
-  const progressPercent = pointsInCycle * 10; // 0,10,...,90 (%)
+  const pointsInCycle = ((groupPoints % 10) + 10) % 10; // グループ表示用
+  const progressPercent = pointsInCycle * 10;
 
-  const charCurrent = Number(character?.current_points ?? 0);
+  // character の current_points が無ければ character.points / group.points にフォールバックする
+  const charCurrent = Number(
+    character?.current_points ??
+    character?.points ??
+    group?.points ??
+    0
+  );
   const charPointsInCycle = ((charCurrent % 10) + 10) % 10;
   const charProgressPercent = charPointsInCycle * 10;
+  const pointsToNext = 10 - (charCurrent % 10);
+  // pointsToNext が 0 になる場合は 10 にする（端数がちょうどゼロのとき）
+  const safePointsToNext = pointsToNext === 0 ? 10 : pointsToNext;
 
   return (
     <AuthenticatedLayout user={auth.user}>
@@ -42,7 +51,7 @@ export default function Show({ auth }) {
           <h2 className="text-lg font-bold text-pink-700 mb-2">🌱 あなたのエノッキー情報</h2>
           <p className="text-md font-semibold">名前：{character?.name ?? '—'}</p>
           <p>レベル：Lv.{character?.level ?? 0}</p>
-          <p>次のレベルまで：あと {character?.points_to_next_level ?? 0}pt</p>
+          <p>次のレベルまで：あと {safePointsToNext}pt</p>
         </div>
 
         {/* 成長メーター（画像の上） */}
