@@ -1,0 +1,11 @@
+[90m= [39m[34;4mApp\Models\Group[39;24m {#6541
+    [34mid[39m: [35m1[39m,
+    [34mname[39m: "[32ms[39m",
+    [34mcreated_by[39m: [35m1[39m,
+    [34mcreated_at[39m: "[32m2025-10-20 04:56:00[39m",
+    [34mupdated_at[39m: "[32m2025-10-20 04:56:00[39m",
+    [34mdescription[39m: [36mnull[39m,
+    [34mpoints[39m: [35m0[39m,
+    [34mselected_dressing_id[39m: [36mnull[39m,
+  }
+
