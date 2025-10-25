@@ -5,27 +5,21 @@ import AuthenticatedLayout from "@/Layouts/AppLayout";
 export default function Show({ auth }) {
     // props のデフォルト値を設定して undefined 回避
     const { group = {}, character = {}, tasks = [] } = usePage().props;
-    // group.points が undefined / null / 非数 の場合に備えて安全に計算
-    const groupPoints = Number(group?.points ?? 0);
-    const pointsInCycle = ((groupPoints % 10) + 10) % 10; // 0-9 の範囲に正規化
-    const progressPercent = pointsInCycle * 10; // 0,10,...,90 (%)
 
-    const charCurrent = Number(character?.current_points ?? 0);
+    // group.points / character.current_points が未定義でも安全に扱う
+    const groupPoints = Number(group?.points ?? 0);
+    const pointsInCycle = ((groupPoints % 10) + 10) % 10; // グループ表示用
+    const progressPercent = pointsInCycle * 10;
+
+    // character の current_points が無ければ character.points / group.points にフォールバックする
+    const charCurrent = Number(
+        character?.current_points ?? character?.points ?? group?.points ?? 0
+    );
     const charPointsInCycle = ((charCurrent % 10) + 10) % 10;
     const charProgressPercent = charPointsInCycle * 10;
-
-    // エノっキーにご飯をあげる処理
-    const handleFeed = (foodId) => {
-        router.post(
-            route("feed-enokki.feed"),
-            { food_id: foodId },
-            {
-                onSuccess: () => {
-                    setShowModal(false); // モーダル閉じる
-                },
-            }
-        );
-    };
+    const pointsToNext = 10 - (charCurrent % 10);
+    // pointsToNext が 0 になる場合は 10 にする（端数がちょうどゼロのとき）
+    const safePointsToNext = pointsToNext === 0 ? 10 : pointsToNext;
 
     return (
         <AuthenticatedLayout user={auth.user}>
@@ -57,10 +51,7 @@ export default function Show({ auth }) {
                         名前：{character?.name ?? "—"}
                     </p>
                     <p>レベル：Lv.{character?.level ?? 0}</p>
-                    <p>
-                        次のレベルまで：あと{" "}
-                        {character?.points_to_next_level ?? 0}pt
-                    </p>
+                    <p>次のレベルまで：あと {safePointsToNext}pt</p>
                 </div>
 
                 {/* 成長メーター（画像の上） */}
@@ -102,16 +93,13 @@ export default function Show({ auth }) {
                             }}
                         ></div>
 
-                        {/* プログレスバー */}
-
                         <h2 className="text-md font-bold text-purple-700 mb-2">
                             💬 今日のひとこと
                         </h2>
-                        <p className="text-sm">「好きな色はみどり！」</p>
+                        <p className="text-sm">{group.dailyMessage}</p>
                     </div>
-
-                    <div className="flex justify-center mt-8">
-                        <div className="flex flex-row gap-4">
+                    <div className="lg:col-span-2 bg-yellow-100/80 backdrop-blur-md rounded-xl p-4 shadow-lg border border-yellow-300">
+                        <div className="flex justify-center gap-3">
                             <Link href={route("admiring.index")}>
                                 <button className="bg-green-300 hover:bg-green-400 text-white font-bold py-2 px-4 rounded-full shadow">
                                     🏠 エノッキーの部屋
@@ -130,7 +118,6 @@ export default function Show({ auth }) {
                         </div>
                     </div>
                 </div>
-
                 {/* 下部：グループ情報とタスク管理 */}
                 <section className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-10">
                     {/* グループ情報 */}
@@ -199,7 +186,9 @@ export default function Show({ auth }) {
                                                     router.patch(
                                                         route(
                                                             "tasks.complete",
-                                                            { task: task.id }
+                                                            {
+                                                                task: task.id,
+                                                            }
                                                         )
                                                     );
                                                 }

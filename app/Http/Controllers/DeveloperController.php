@@ -8,6 +8,8 @@ use Illuminate\Support\Facades\DB;
 use App\Models\User;
 use App\Models\DevGroup;
 use App\Models\DevGroupUser;
+use App\Services\GitHubService;
+use App\Models\DevCharacter;
 
 class DeveloperController extends Controller
 {
@@ -20,7 +22,6 @@ class DeveloperController extends Controller
 
     public function create(Request $request)
     {
-        // リクエストの内容を確認
         \Log::info('受信データ:', $request->all());
         
         $validated = $request->validate([
@@ -29,9 +30,6 @@ class DeveloperController extends Controller
             'account_name' => 'required|string|max:255',
         ]);
         
-        \Log::info('バリデーション後:', $validated);
-
-        // GitHub URL をパースして owner / repo を取得
         $parsed = $this->parseGitHubUrl($validated['repository_url']);
         if (!$parsed) {
             return redirect()->back()->with('error', 'リポジトリURLが GitHub の形式ではありません（例: https://github.com/owner/repo）');
@@ -45,7 +43,7 @@ class DeveloperController extends Controller
                 $uuid = strtoupper(Str::random(10));
             } while (DevGroup::where('uuid', $uuid)->exists());
 
-            // グループを作成（owner/name を保存）
+            // グループを作成
             $group = DevGroup::create([
                 'uuid' => $uuid,
                 'name' => $validated['group_name'],
@@ -53,6 +51,16 @@ class DeveloperController extends Controller
                 'total_points' => 0,
                 'repository_owner' => $parsed['owner'],
                 'repository_name' => $parsed['repo'],
+            ]);
+
+            // キャラクターを作成
+            DevCharacter::create([
+                'devgroup_id' => $group->id,
+                'name' => 'エノッキー',
+                'level' => 1,
+                'experience' => 0,
+                'image_path' => '/Enokkie/EnokkieImage.png', // デフォルト画像
+                'affection' => 0,
             ]);
 
             // 作成者を自動的にメンバーに追加
@@ -74,7 +82,6 @@ class DeveloperController extends Controller
             return redirect()->back()->with('error', 'グループの作成に失敗しました: ' . $e->getMessage());
         }
     }
-
     public function join(Request $request)
     {
         $validated = $request->validate([
@@ -121,13 +128,18 @@ class DeveloperController extends Controller
         }
     }
 
+    protected $githubService;
+
+    public function __construct(GitHubService $githubService)
+    {
+        $this->githubService = $githubService;
+    }
+
     public function show($id)
     {
         try {
-            // グループデータを取得
-            $group = DevGroup::with(['devGroupUsers.user'])->findOrFail($id);
+            $group = DevGroup::with(['devGroupUsers.user', 'character'])->findOrFail($id);
             
-            // ユーザーがこのグループに所属しているか確認
             $user = auth()->user();
             $isMember = DevGroupUser::where('devgroup_id', $id)
                 ->where('user_id', $user->id)
@@ -138,10 +150,51 @@ class DeveloperController extends Controller
                     ->with('error', 'アクセス権限がありません');
             }
 
+            // キャラクター情報を取得
+            $character = $group->character;
+
+            // 各メンバーのコントリビューションを取得
+            $githubService = app(\App\Services\GitHubService::class);
+            $totalPoints = 0;
+            
+            foreach ($group->devGroupUsers as $member) {
+                if ($member->github_account) {
+                    $contribution = $githubService->getContributionPoints(
+                        $group->repository_owner,
+                        $group->repository_name,
+                        $member->github_account
+                    );
+
+                    $member->update([
+                        'personal_points' => $contribution['total_points']
+                    ]);
+
+                    $member->contribution_details = $contribution;
+                    $totalPoints += $contribution['total_points'];
+                } else {
+                    $member->contribution_details = [
+                        'commits' => 0,
+                        'pushes' => 0,
+                        'merges' => 0,
+                        'total_points' => 0,
+                    ];
+                }
+            }
+
+            $group->update(['total_points' => $totalPoints]);
+
             return inertia('Developer/GroupPage', [
-                'group' => $group
+                'group' => $group,
+                'character' => [
+                    'name' => $character->name,
+                    'level' => $character->level,
+                    'experience' => $character->experience,
+                    'image_url' => $character->image_url, // DevCharacterのアクセサを使用
+                    'affection' => $character->affection,
+                ],
             ]);
         } catch (\Exception $e) {
+            \Log::error('Group show error: ' . $e->getMessage());
             return redirect()->route('developer.index')
                 ->with('error', 'グループの表示に失敗しました');
         }
@@ -161,5 +214,59 @@ class DeveloperController extends Controller
         }
         
         return null;
+    }
+
+    // app/Http/Controllers/DeveloperController.php
+
+    public function leave($id)
+    {
+        try {
+            $user = auth()->user();
+            
+            // グループの存在確認
+            $group = DevGroup::findOrFail($id);
+            
+            // ユーザーがグループに所属しているか確認
+            $membership = DevGroupUser::where('devgroup_id', $id)
+                ->where('user_id', $user->id)
+                ->first();
+
+            if (!$membership) {
+                return redirect()->route('developer.index')
+                    ->with('error', 'このグループに参加していません');
+            }
+
+            DB::beginTransaction();
+
+            // メンバーシップを削除
+            $membership->delete();
+
+            // グループに誰もいなくなった場合、グループとキャラクターも削除
+            $remainingMembers = DevGroupUser::where('devgroup_id', $id)->count();
+            
+            if ($remainingMembers === 0) {
+                // キャラクターを削除
+                $group->character()->delete();
+                // グループを削除
+                $group->delete();
+                
+                DB::commit();
+                
+                return redirect()->route('developer.index')
+                    ->with('success', 'グループから退会しました（最後のメンバーだったためグループを削除しました）');
+            }
+
+            DB::commit();
+            
+            return redirect()->route('developer.index')
+                ->with('success', 'グループから退会しました');
+                
+        } catch (\Exception $e) {
+            DB::rollBack();
+            \Log::error('グループ退会エラー: ' . $e->getMessage());
+            
+            return redirect()->route('developer.index')
+                ->with('error', 'グループからの退会に失敗しました');
+        }
     }
 }

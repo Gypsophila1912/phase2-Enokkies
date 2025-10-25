@@ -17,6 +17,8 @@ class EnokkiController extends Controller
 {
     public function show()
     {
+        $today = Carbon::today()->toDateString();
+        $cacheKey = 'daily_message_' . $today;
         $user = Auth::user();
         $group = $user->group;
 
@@ -58,8 +60,6 @@ class EnokkiController extends Controller
         // 今日の日付を元にランダムなメッセージを1件取得
         $seed = intval(date('Ymd'));
         srand($seed);
-        $dailyMessage = DailyMessage::inRandomOrder()->first()?->message ?? '「今日もがんばろう！」';
-
         
         // 今日の日付（例：2025-10-22）
         $today = Carbon::today()->toDateString();
@@ -81,8 +81,7 @@ class EnokkiController extends Controller
                 'members_count' => $group->users()->count(),
                 'points' => (int) ($group->points ?? 0),
                 'days_since_created' => $daysSinceCreated,
-                'dailyMessage' => $message->message,
-            ],
+                'dailyMessage' => $message ? $message->message : '「全力開発！！」',            ],
             'character' => [
                 'name' => $character->name,
                 'level' => $character->level,
@@ -91,7 +90,6 @@ class EnokkiController extends Controller
                 'image_url' => asset($character->image_path),
             ],
             'tasks' => $tasks,
-            'dailyMessage' => $dailyMessage,
         ]);
     }
 }
