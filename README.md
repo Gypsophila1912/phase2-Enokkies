@@ -1,61 +1,56 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# エノッキー育成アプリ（Enokkie-App）
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+**＜一般向け＞**<br>
+自分で設定したタスクをこなしてエノッキーを育成する<br>
 
-## About Laravel
+**＜開発者向け＞**<br>
+Git のコントリビュートの数でエノッキーを育成する
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+# Technology Stack
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+・Laravel Sail<br>
+・Laravel Breeze<br>
+・Inertia<br>
+・TailwindCss<br>
+・Vite<br>
+・mySQL<br>
+・Docker<br>
+・Figma<br>
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+# DEMO
 
-## Learning Laravel
+新規登録・チーム作成編<br>
+https://youtu.be/sfjaVahVg2E
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
+ログイン・チーム参加編<br>
+https://youtu.be/pJ_foCWXFJE
 
-You may also try the [Laravel Bootcamp](https://bootcamp.laravel.com), where you will be guided through building a modern Laravel application from scratch.
+# Usage
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+**＜ログイン・ユーザー登録＞**<br>
+Breeze の認証機能をそのまま使用しています。各画面から登録・ログインできます。<br>
 
-## Laravel Sponsors
+**＜一般グループ作成＞**<br>
+グループ選択またはグループ作成のタブを選択し作成を行ってください。グループの名前、説明を記入することができます。<br>
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the [Laravel Partners program](https://partners.laravel.com).
+**＜一般グループ画面＞**<br>
+成長メーターが見れたり、自分のタスク編集が可能です。またショップや愛でる部屋への移動が可能です。<br>
 
-### Premium Partners
+・成長メーター：タスクを完了すると溜まっていきます。一定量溜まるとエノッキーがレベルアップします。<br>
+・エノッキーの部屋：エノッキーにご飯を上げたり、名前を編集する部屋です。愛でてあげてください。<br>
+・ショップ：貯めたポイントでご飯が買えます。(ポイントはタスクを完了することで取得可能です。)<br>
+・着替え部屋：エノッキーの着せ替えができます。<br>
+・タスク編集：タスクの追加・編集・削除が可能です。<br>
 
-- **[Vehikl](https://vehikl.com)**
-- **[Tighten Co.](https://tighten.co)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel)**
-- **[DevSquad](https://devsquad.com/hire-laravel-developers)**
-- **[Redberry](https://redberry.international/laravel-development)**
-- **[Active Logic](https://activelogic.com)**
+**＜開発者グループ作成＞**<br>
+作成タブを押したのち、グループの名前・リポジトリ URL・GitHub アカウント名を入力し作成します。（リポジトリは public のみ対応しています）<br>
 
-## Contributing
+**＜開発者グループ画面＞**<br>
+一般の画面とほとんど変わりません。タスク編集の部分が Git のコントリビューションの値表示に置き換わっています。ポイントはコミット 1Pt プッシュ 5Pt マージ 10Pt に換算し計算しています。
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+# Author
 
-## Code of Conduct
-
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
-
-## Security Vulnerabilities
-
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
-
-## License
-
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+Gypsophila1912<br>
+nanakatomita<br>
+Ayaka098<br>
+jyo014<br>
