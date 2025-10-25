@@ -1,7 +1,20 @@
 import AppLayout from "@/Layouts/AppLayout";
 import { Head } from "@inertiajs/react";
+import { useState } from "react";
 
 export default function GroupPage({ group }) {
+    const [copied, setCopied] = useState(false);
+
+    const copyToClipboard = async () => {
+        try {
+            await navigator.clipboard.writeText(group.uuid);
+            setCopied(true);
+            setTimeout(() => setCopied(false), 2000);
+        } catch (err) {
+            console.error("コピーに失敗しました:", err);
+        }
+    };
+
     return (
         <AppLayout>
             <div className="min-h-screen bg-gradient-to-br from-lime-200 via-green-100 to-green-300 px-4 py-10 font-sans text-gray-800 relative overflow-hidden">
@@ -23,9 +36,32 @@ export default function GroupPage({ group }) {
                 <div className="max-w-7xl mx-auto z-10">
                     <Head title={`${group.name} - 開発者モード`} />
 
-                    <h1 className="text-3xl font-bold text-green-700 mb-8 text-center">
+                    <h1 className="text-3xl font-bold text-green-700 mb-4 text-center">
                         🌿 {group.name}
                     </h1>
+
+                    {/* UUID表示 */}
+                    <div className="mb-8 flex justify-center">
+                        <button
+                            onClick={copyToClipboard}
+                            className="bg-white/80 backdrop-blur-md border border-green-300 rounded-full shadow px-4 py-2 hover:bg-white hover:shadow-lg transition-all duration-300 flex items-center gap-2 group"
+                        >
+                            <span className="text-xs font-medium text-green-700">
+                                UUID:
+                            </span>
+                            <span className="text-sm font-mono text-gray-600">
+                                {group.uuid}
+                            </span>
+                            <span className="text-green-600 group-hover:scale-110 transition-transform duration-200">
+                                {copied ? "✓" : "📋"}
+                            </span>
+                        </button>
+                        {copied && (
+                            <div className="ml-2 bg-green-600 text-white text-xs px-3 py-2 rounded-full shadow-lg animate-fade-in">
+                                コピーしました！
+                            </div>
+                        )}
+                    </div>
 
                     {/* チーム全体のポイント表示 */}
                     <div className="mb-8 bg-white/80 backdrop-blur-md border border-green-300 rounded-xl shadow-lg p-8 text-center">
@@ -112,6 +148,13 @@ export default function GroupPage({ group }) {
                             0% { opacity: 0.2; transform: scale(1); }
                             50% { opacity: 1; transform: scale(1.5); }
                             100% { opacity: 0.2; transform: scale(1); }
+                        }
+                        @keyframes fade-in {
+                            from { opacity: 0; transform: translateX(-10px); }
+                            to { opacity: 1; transform: translateX(0); }
+                        }
+                        .animate-fade-in {
+                            animation: fade-in 0.3s ease-out;
                         }
                     `}
                 </style>

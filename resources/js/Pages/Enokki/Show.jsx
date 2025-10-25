@@ -3,105 +3,103 @@ import { usePage, Head, Link, router } from "@inertiajs/react";
 import AuthenticatedLayout from "@/Layouts/AppLayout";
 
 export default function Show({ auth }) {
+    // props のデフォルト値を設定して undefined 回避
+    const { group = {}, character = {}, tasks = [] } = usePage().props;
 
-  // props のデフォルト値を設定して undefined 回避
-  const { group = {}, character = {}, tasks = [] } = usePage().props;
+    // group.points / character.current_points が未定義でも安全に扱う
+    const groupPoints = Number(group?.points ?? 0);
+    const pointsInCycle = ((groupPoints % 10) + 10) % 10; // グループ表示用
+    const progressPercent = pointsInCycle * 10;
 
-  // group.points / character.current_points が未定義でも安全に扱う
-  const groupPoints = Number(group?.points ?? 0);
-  const pointsInCycle = ((groupPoints % 10) + 10) % 10; // グループ表示用
-  const progressPercent = pointsInCycle * 10;
+    // character の current_points が無ければ character.points / group.points にフォールバックする
+    const charCurrent = Number(
+        character?.current_points ?? character?.points ?? group?.points ?? 0
+    );
+    const charPointsInCycle = ((charCurrent % 10) + 10) % 10;
+    const charProgressPercent = charPointsInCycle * 10;
+    const pointsToNext = 10 - (charCurrent % 10);
+    // pointsToNext が 0 になる場合は 10 にする（端数がちょうどゼロのとき）
+    const safePointsToNext = pointsToNext === 0 ? 10 : pointsToNext;
 
-  // character の current_points が無ければ character.points / group.points にフォールバックする
-  const charCurrent = Number(
-    character?.current_points ??
-    character?.points ??
-    group?.points ??
-    0
-  );
-  const charPointsInCycle = ((charCurrent % 10) + 10) % 10;
-  const charProgressPercent = charPointsInCycle * 10;
-  const pointsToNext = 10 - (charCurrent % 10);
-  // pointsToNext が 0 になる場合は 10 にする（端数がちょうどゼロのとき）
-  const safePointsToNext = pointsToNext === 0 ? 10 : pointsToNext;
+    return (
+        <AuthenticatedLayout user={auth.user}>
+            <Head title="エノッキー育成" />
 
-  return (
-    <AuthenticatedLayout user={auth.user}>
-      <Head title="エノッキー育成" />
+            <div className="min-h-screen bg-gradient-to-br from-lime-200 via-green-100 to-green-300 px-6 py-10 font-sans text-gray-800 relative overflow-hidden">
+                {/* キラキラエフェクト */}
+                {[...Array(20)].map((_, i) => (
+                    <div
+                        key={i}
+                        className="absolute sparkle"
+                        style={{
+                            top: `${Math.random() * 100}%`,
+                            left: `${Math.random() * 100}%`,
+                            animationDelay: `${Math.random() * 2}s`,
+                            fontSize: `${Math.random() * 1.5 + 0.8}rem`,
+                        }}
+                    >
+                        ✨
+                    </div>
+                ))}
 
-      <div className="min-h-screen bg-gradient-to-br from-lime-200 via-green-100 to-green-300 px-6 py-10 font-sans text-gray-800 relative overflow-hidden">
+                {/* エノッキー情報（左上） */}
+                <div className="absolute top-40 left-20 bg-pink-100/80 backdrop-blur-md rounded-xl p-4 shadow-lg border border-pink-300 w-[300px]">
+                    <h2 className="text-lg font-bold text-pink-700 mb-2">
+                        🌱 あなたのエノッキー情報
+                    </h2>
+                    <p className="text-md font-semibold">
+                        名前：{character?.name ?? "—"}
+                    </p>
+                    <p>レベル：Lv.{character?.level ?? 0}</p>
+                    <p>次のレベルまで：あと {safePointsToNext}pt</p>
+                </div>
 
-        {/* キラキラエフェクト */}
-        {[...Array(20)].map((_, i) => (
-          <div
-            key={i}
-            className="absolute sparkle"
-            style={{
-              top: `${Math.random() * 100}%`,
-              left: `${Math.random() * 100}%`,
-              animationDelay: `${Math.random() * 2}s`,
-              fontSize: `${Math.random() * 1.5 + 0.8}rem`,
-            }}
-          >
-            ✨
-          </div>
-        ))}
+                {/* 成長メーター（画像の上） */}
+                <div className="absolute top-3 left-1/2 transform -translate-x-1/2 w-[600px] bg-white/80 backdrop-blur-md rounded-xl p-4 shadow-lg border border-green-300">
+                    <h2 className="text-sm font-bold text-green-800 mb-2">
+                        🍀 成長メーター
+                    </h2>
+                    <div className="w-full bg-gray-300 rounded-full h-4">
+                        <div
+                            className="bg-green-500 h-4 rounded-full transition-all duration-500"
+                            style={{ width: `${progressPercent}%` }}
+                        ></div>
+                    </div>
+                    <p className="text-sm text-gray-600 mt-1 text-right">
+                        {pointsInCycle}pt / 10pt
+                    </p>
+                </div>
 
-        {/* エノッキー情報（左上） */}
-        <div className="absolute top-40 left-20 bg-pink-100/80 backdrop-blur-md rounded-xl p-4 shadow-lg border border-pink-300 w-[300px]">
-          <h2 className="text-lg font-bold text-pink-700 mb-2">🌱 あなたのエノッキー情報</h2>
-          <p className="text-md font-semibold">名前：{character?.name ?? '—'}</p>
-          <p>レベル：Lv.{character?.level ?? 0}</p>
-          <p>次のレベルまで：あと {safePointsToNext}pt</p>
-        </div>
+                {/* エノッキー画像（中央） */}
+                <div className="flex justify-center mt-[80px]">
+                    <div className="bg-white/80 backdrop-blur-md rounded-xl p-6 shadow-lg border border-green-400">
+                        <img
+                            src={character.image_url}
+                            alt="エノッキー"
+                            className="w-40 h-50 object-cover border-4 border-green-400"
+                        />
+                    </div>
+                </div>
 
-        {/* 成長メーター（画像の上） */}
-        <div className="absolute top-3 left-1/2 transform -translate-x-1/2 w-[600px] bg-white/80 backdrop-blur-md rounded-xl p-4 shadow-lg border border-green-300">
-          <h2 className="text-sm font-bold text-green-800 mb-2">🍀 成長メーター</h2>
-          <div className="w-full bg-gray-300 rounded-full h-4">
-                <div
-                  className="bg-green-500 h-4 rounded-full transition-all duration-500"
-                  style={{ width: `${progressPercent}%` }}
-                ></div>
-              </div>
-              <p className="text-sm text-gray-600 mt-1 text-right">
-                {pointsInCycle}pt / 10pt
-              </p>
-        </div>
+                {/* 右側：今日のひとこと＋ボタン群 */}
+                <div className="absolute top-[185px] right-10 space-y-4">
+                    <div className="relative bg-purple-100/80 backdrop-blur-md rounded-xl p-4 shadow-lg border border-purple-300 w-[250px]">
+                        <div
+                            className="absolute top-4 -left-3 w-0 h-0"
+                            style={{
+                                borderRight: "12px solid #D8B4F8",
+                                borderTop: "12px solid transparent",
+                                borderBottom: "12px solid transparent",
+                            }}
+                        ></div>
 
-        {/* エノッキー画像（中央） */}
-        <div className="flex justify-center mt-[80px]">
-          <div className="bg-white/80 backdrop-blur-md rounded-xl p-6 shadow-lg border border-green-400">
-            <img
-              src="/images/EnokkieImage.png"
-              alt="エノッキー"
-              className="w-40 h-50 object-cover border-4 border-green-400"
-            />
-          </div>
-        </div>
-
-        {/* 右側：今日のひとこと＋ボタン群 */}
-        <div className="absolute top-[185px] right-10 space-y-4">
-          <div className="relative bg-purple-100/80 backdrop-blur-md rounded-xl p-4 shadow-lg border border-purple-300 w-[250px]">
-            <div className="absolute top-4 -left-3 w-0 h-0"
-                style={{
-                    borderRight: '12px solid #D8B4F8',
-                    borderTop: '12px solid transparent',
-                    borderBottom: '12px solid transparent'
-                }}>
-            </div>
-
-            <h2 className="text-md font-bold text-purple-700 mb-2">💬 今日のひとこと</h2>
-            <p className="text-sm">{group.dailyMessage}</p>
-          </div>
-
-         
-
-          {/* タスク一覧 */}
-          <div className="lg:col-span-2 bg-yellow-100/80 backdrop-blur-md rounded-xl p-6 shadow-lg border border-yellow-300 overflow-auto max-h-[400px]">
-
-                    <div className="flex justify-center mt-8">
-                        <div className="flex flex-row gap-4">
+                        <h2 className="text-md font-bold text-purple-700 mb-2">
+                            💬 今日のひとこと
+                        </h2>
+                        <p className="text-sm">{group.dailyMessage}</p>
+                    </div>
+                    <div className="lg:col-span-2 bg-yellow-100/80 backdrop-blur-md rounded-xl p-4 shadow-lg border border-yellow-300">
+                        <div className="flex justify-center gap-3">
                             <Link href={route("admiring.index")}>
                                 <button className="bg-green-300 hover:bg-green-400 text-white font-bold py-2 px-4 rounded-full shadow">
                                     🏠 エノッキーの部屋
@@ -120,7 +118,6 @@ export default function Show({ auth }) {
                         </div>
                     </div>
                 </div>
-
                 {/* 下部：グループ情報とタスク管理 */}
                 <section className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-10">
                     {/* グループ情報 */}
@@ -189,7 +186,9 @@ export default function Show({ auth }) {
                                                     router.patch(
                                                         route(
                                                             "tasks.complete",
-                                                            { task: task.id }
+                                                            {
+                                                                task: task.id,
+                                                            }
                                                         )
                                                     );
                                                 }
