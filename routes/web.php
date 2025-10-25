@@ -15,6 +15,8 @@ use App\Http\Controllers\AdmiringController;
 use App\Http\Controllers\CharacterController;
 use App\Http\Controllers\DressingController;
 use App\Http\Controllers\ShopController;
+use App\Http\Controllers\DevShopController;
+use App\Http\Controllers\DevAdmiringController;
 
 Route::get('/', function () {
     return Inertia::render('Welcome', [
@@ -43,6 +45,19 @@ Route::middleware('auth')->group(function () {
     Route::get('/developer', [DeveloperController::class, 'index'])->name('developer.index');
     Route::post('/developer/create', [DeveloperController::class, 'create'])->name('developer.create');
     Route::get('/developer/group/{id}', [DeveloperController::class, 'show'])->name('developer.show');
+    Route::post('/developer/join', [DeveloperController::class, 'join'])->name('developer.join');
+    Route::delete('/developer/group/{id}/leave', [DeveloperController::class, 'leave'])->name('developer.leave');
+    Route::get('/developer/shop', [DevShopController::class, 'index'])->name('devfoods.shop');
+    Route::post('/developer/foods/buy/{food}', [DevShopController::class, 'buy'])->name('devfoods.buy');
+    
+    Route::get('/devadmiring', [DevAdmiringController::class, 'index'])->name('devadmiring.index');
+    Route::patch('/devenokkie/{groupId}/name', [DevAdmiringController::class, 'updateName'])->name('devenokkie.updateName');
+    Route::patch('/devadmiring/update', [DevAdmiringController::class, 'update'])->name('devadmiring.update');
+    Route::patch('/devgroup-foods/useItem', [DevAdmiringController::class, 'useItem'])->name('devgroup-foods.use');
+    //character dressing room
+
+    Route::get('/character/dressing-room', [CharacterController::class, 'dressingRoom'])->name('character.dressing-room')->middleware('auth');
+
 
     //group
     Route::get('/groups', [GroupController::class, 'index'])->name('groups.index');
@@ -53,6 +68,7 @@ Route::middleware('auth')->group(function () {
     Route::get('/group-create', [GroupController::class, 'create'])->name('groups.create');
     Route::delete('/groups/{id}', [GroupController::class, 'destroy'])->name('groups.destroy');
     Route::delete('/account', [UserController::class, 'destroy'])->name('account.destroy');
+
 
     // 🆕 Enokki育成画面のルートを追加
     Route::get('/enokki', [EnokkiController::class, 'show'])->name('enokki.show');
