@@ -98,123 +98,116 @@ export default function Show({ auth }) {
                         </h2>
                         <p className="text-sm">{group.dailyMessage}</p>
                     </div>
+                    <div className="lg:col-span-2 bg-yellow-100/80 backdrop-blur-md rounded-xl p-4 shadow-lg border border-yellow-300">
+                        <div className="flex justify-center gap-3">
+                            <Link href={route("admiring.index")}>
+                                <button className="bg-green-300 hover:bg-green-400 text-white font-bold py-2 px-4 rounded-full shadow">
+                                    🏠 エノッキーの部屋
+                                </button>
+                            </Link>
+                            <Link href="/food-shop">
+                                <button className="bg-yellow-300 hover:bg-yellow-400 text-white font-bold py-2 px-4 rounded-full shadow">
+                                    🛍 ショップ
+                                </button>
+                            </Link>
+                            <Link href={route("character.dressing-room")}>
+                                <button className="bg-pink-300 hover:bg-pink-400 text-white font-bold py-2 px-4 rounded-full shadow">
+                                    🎁 ごはんをあげる
+                                </button>
+                            </Link>
+                        </div>
+                    </div>
+                </div>
+                {/* 下部：グループ情報とタスク管理 */}
+                <section className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-10">
+                    {/* グループ情報 */}
+                    <div className="bg-blue-100/80 backdrop-blur-md rounded-xl p-6 shadow-lg border border-blue-300">
+                        <h2 className="text-xl font-bold text-blue-800 mb-4">
+                            🌳 グループ情報
+                        </h2>
+                        <p>グループ名：{group?.name ?? "—"}</p>
+                        <p>詳細：{group?.description ?? "—"}</p>
+                        <p>メンバー数：{group?.members_count ?? 0}人</p>
+                        <p>所持ポイント：{Number(group?.points ?? 0)}pt</p>
+                        <p>
+                            育て始めて：
+                            {Math.ceil(Number(group?.days_since_created ?? 0))}
+                            日目
+                        </p>
+                    </div>
 
                     {/* タスク一覧 */}
                     <div className="lg:col-span-2 bg-yellow-100/80 backdrop-blur-md rounded-xl p-6 shadow-lg border border-yellow-300 overflow-auto max-h-[400px]">
-                        <div className="flex justify-center mt-8">
-                            <div className="flex flex-row gap-4">
-                                <Link href={route("admiring.index")}>
-                                    <button className="bg-green-300 hover:bg-green-400 text-white font-bold py-2 px-4 rounded-full shadow">
-                                        🏠 エノッキーの部屋
-                                    </button>
-                                </Link>
-                                <Link href="/food-shop">
-                                    <button className="bg-yellow-300 hover:bg-yellow-400 text-white font-bold py-2 px-4 rounded-full shadow">
-                                        🛍 ショップ
-                                    </button>
-                                </Link>
-                                <Link href={route("character.dressing-room")}>
-                                    <button className="bg-pink-300 hover:bg-pink-400 text-white font-bold py-2 px-4 rounded-full shadow">
-                                        🎁 ごはんをあげる
-                                    </button>
-                                </Link>
-                            </div>
-                        </div>
-                    </div>
-
-                    {/* 下部：グループ情報とタスク管理 */}
-                    <section className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-10">
-                        {/* グループ情報 */}
-                        <div className="bg-blue-100/80 backdrop-blur-md rounded-xl p-6 shadow-lg border border-blue-300">
-                            <h2 className="text-xl font-bold text-blue-800 mb-4">
-                                🌳 グループ情報
+                        <div className="flex justify-between items-center">
+                            <h2 className="text-xl font-bold text-yellow-800">
+                                📋 タスク一覧
                             </h2>
-                            <p>グループ名：{group?.name ?? "—"}</p>
-                            <p>詳細：{group?.description ?? "—"}</p>
-                            <p>メンバー数：{group?.members_count ?? 0}人</p>
-                            <p>所持ポイント：{Number(group?.points ?? 0)}pt</p>
-                            <p>
-                                育て始めて：
-                                {Math.ceil(
-                                    Number(group?.days_since_created ?? 0)
-                                )}
-                                日目
-                            </p>
+                            <Link href="/tasks">
+                                <button className="bg-yellow-400 hover:bg-yellow-500 text-white font-bold py-1 px-3 rounded-full shadow">
+                                    ✏️ タスク編集
+                                </button>
+                            </Link>
                         </div>
 
-                        {/* タスク一覧 */}
-                        <div className="lg:col-span-2 bg-yellow-100/80 backdrop-blur-md rounded-xl p-6 shadow-lg border border-yellow-300 overflow-auto max-h-[400px]">
-                            <div className="flex justify-between items-center">
-                                <h2 className="text-xl font-bold text-yellow-800">
-                                    📋 タスク一覧
-                                </h2>
-                                <Link href="/tasks">
-                                    <button className="bg-yellow-400 hover:bg-yellow-500 text-white font-bold py-1 px-3 rounded-full shadow">
-                                        ✏️ タスク編集
-                                    </button>
-                                </Link>
-                            </div>
-
-                            <ul className="space-y-3">
-                                {Array.isArray(tasks) && tasks.length > 0 ? (
-                                    tasks.map((task) => (
-                                        <li
-                                            key={task.id}
-                                            className={`flex items-center justify-between p-3 rounded-md ${
-                                                task.is_done
-                                                    ? "bg-gray-200"
-                                                    : "bg-lime-100"
-                                            }`}
-                                        >
-                                            <div>
-                                                <p
-                                                    className={`font-semibold ${
-                                                        task.is_done
-                                                            ? "line-through text-gray-500"
-                                                            : ""
-                                                    }`}
-                                                >
-                                                    {task.title}
-                                                </p>
-                                                <p className="text-sm text-gray-600">
-                                                    {task.memo ??
-                                                        task.description}
-                                                </p>
-                                                <p className="text-sm text-gray-500">
-                                                    期限：{task.due_date ?? "—"}
-                                                </p>
-                                            </div>
-                                            <input
-                                                type="checkbox"
-                                                checked={Boolean(task.is_done)}
-                                                disabled={Boolean(task.is_done)}
-                                                onChange={() => {
-                                                    if (!task.is_done) {
-                                                        router.patch(
-                                                            route(
-                                                                "tasks.complete",
-                                                                {
-                                                                    task: task.id,
-                                                                }
-                                                            )
-                                                        );
-                                                    }
-                                                }}
-                                            />
-                                        </li>
-                                    ))
-                                ) : (
-                                    <li className="text-gray-600">
-                                        タスクがありません。
+                        <ul className="space-y-3">
+                            {Array.isArray(tasks) && tasks.length > 0 ? (
+                                tasks.map((task) => (
+                                    <li
+                                        key={task.id}
+                                        className={`flex items-center justify-between p-3 rounded-md ${
+                                            task.is_done
+                                                ? "bg-gray-200"
+                                                : "bg-lime-100"
+                                        }`}
+                                    >
+                                        <div>
+                                            <p
+                                                className={`font-semibold ${
+                                                    task.is_done
+                                                        ? "line-through text-gray-500"
+                                                        : ""
+                                                }`}
+                                            >
+                                                {task.title}
+                                            </p>
+                                            <p className="text-sm text-gray-600">
+                                                {task.memo ?? task.description}
+                                            </p>
+                                            <p className="text-sm text-gray-500">
+                                                期限：{task.due_date ?? "—"}
+                                            </p>
+                                        </div>
+                                        <input
+                                            type="checkbox"
+                                            checked={Boolean(task.is_done)}
+                                            disabled={Boolean(task.is_done)}
+                                            onChange={() => {
+                                                if (!task.is_done) {
+                                                    router.patch(
+                                                        route(
+                                                            "tasks.complete",
+                                                            {
+                                                                task: task.id,
+                                                            }
+                                                        )
+                                                    );
+                                                }
+                                            }}
+                                        />
                                     </li>
-                                )}
-                            </ul>
-                        </div>
-                    </section>
+                                ))
+                            ) : (
+                                <li className="text-gray-600">
+                                    タスクがありません。
+                                </li>
+                            )}
+                        </ul>
+                    </div>
+                </section>
 
-                    {/* キラキラアニメーション用スタイル */}
-                    <style>
-                        {`
+                {/* キラキラアニメーション用スタイル */}
+                <style>
+                    {`
             .sparkle {
               animation: sparkle 1.5s infinite;
               pointer-events: none;
@@ -226,8 +219,7 @@ export default function Show({ auth }) {
               100% { opacity: 0.2; transform: scale(1); }
             }
           `}
-                    </style>
-                </div>
+                </style>
             </div>
         </AuthenticatedLayout>
     );
