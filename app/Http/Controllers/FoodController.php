@@ -20,36 +20,6 @@ class FoodController extends Controller
         ]);
     }
 
-    public function feedToGroup($foodId)
-    {
-        $user = auth()->user();
-        $food = Food::findOrFail($foodId);
-
-        // ユーザーが所属するグループのエノっキー
-        $group = $user->group; 
-        if (!$group || !$group->character) {
-            return back()->with('error', 'このグループにはエノっキーがいません');
-        }
-        $character = $group->character;
-
-        // ユーザーがそのご飯を持っているか確認
-        $userFood = $user->foods()->where('food_id', $foodId)->first();
-        if (!$userFood || $userFood->pivot->quantity < 1) {
-            return back()->with('error', 'そのご飯は持っていません');
-        }
-
-        // 経験値加算（例：価格の半分を経験値に）
-        $character->experience += intval($food->price / 2);
-        $character->level = floor($character->experience / 100) + 1;
-        $character->save();
-
-        // 食べた分を減らす
-        $user->foods()->updateExistingPivot($foodId, [
-            'quantity' => $userFood->pivot->quantity - 1
-        ]);
-
-        return back()->with('success', "{$food->name}をエノっキーにあげました！ 経験値 +".intval($food->price / 2));
-    }
 
     /**
      * ご飯を購入してグループの所持ご飯に追加する
