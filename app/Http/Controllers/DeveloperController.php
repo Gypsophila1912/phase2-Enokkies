@@ -8,6 +8,7 @@ use Illuminate\Support\Facades\DB;
 use App\Models\User;
 use App\Models\DevGroup;
 use App\Models\DevGroupUser;
+use App\Services\GitHubService;
 
 class DeveloperController extends Controller
 {
@@ -29,8 +30,6 @@ class DeveloperController extends Controller
             'account_name' => 'required|string|max:255',
         ]);
         
-        \Log::info('バリデーション後:', $validated);
-
         // GitHub URL をパースして owner / repo を取得
         $parsed = $this->parseGitHubUrl($validated['repository_url']);
         if (!$parsed) {
@@ -121,31 +120,70 @@ class DeveloperController extends Controller
         }
     }
 
-    public function show($id)
+    protected $githubService;
+
+    public function __construct(GitHubService $githubService)
     {
-        try {
-            // グループデータを取得
-            $group = DevGroup::with(['devGroupUsers.user'])->findOrFail($id);
-            
-            // ユーザーがこのグループに所属しているか確認
-            $user = auth()->user();
-            $isMember = DevGroupUser::where('devgroup_id', $id)
-                ->where('user_id', $user->id)
-                ->exists();
-
-            if (!$isMember) {
-                return redirect()->route('developer.index')
-                    ->with('error', 'アクセス権限がありません');
-            }
-
-            return inertia('Developer/GroupPage', [
-                'group' => $group
-            ]);
-        } catch (\Exception $e) {
-            return redirect()->route('developer.index')
-                ->with('error', 'グループの表示に失敗しました');
-        }
+        $this->githubService = $githubService;
     }
+
+public function show($id)
+{
+    try {
+        $group = DevGroup::with(['devGroupUsers.user'])->findOrFail($id);
+        
+        $user = auth()->user();
+        $isMember = DevGroupUser::where('devgroup_id', $id)
+            ->where('user_id', $user->id)
+            ->exists();
+
+        if (!$isMember) {
+            return redirect()->route('developer.index')
+                ->with('error', 'アクセス権限がありません');
+        }
+
+        // 各メンバーのコントリビューションを取得
+        $githubService = app(\App\Services\GitHubService::class);
+        $totalPoints = 0;
+        
+        foreach ($group->devGroupUsers as $member) {
+            if ($member->github_account) {
+                $contribution = $githubService->getContributionPoints(
+                    $group->repository_owner,
+                    $group->repository_name,
+                    $member->github_account
+                );
+
+                $member->update([
+                    'personal_points' => $contribution['total_points']
+                ]);
+
+                // 一時的なプロパティとして追加（再読み込み後も残るように）
+                $member->contribution_details = $contribution;
+                $totalPoints += $contribution['total_points'];
+            } else {
+                // GitHubアカウントがない場合は0で初期化
+                $member->contribution_details = [
+                    'commits' => 0,
+                    'pushes' => 0,
+                    'merges' => 0,
+                    'total_points' => 0,
+                ];
+            }
+        }
+
+        $group->update(['total_points' => $totalPoints]);
+
+        // ここで再読み込みしない（contribution_detailsが消えるため）
+        return inertia('Developer/GroupPage', [
+            'group' => $group  // load()を削除
+        ]);
+    } catch (\Exception $e) {
+        \Log::error('Group show error: ' . $e->getMessage());
+        return redirect()->route('developer.index')
+            ->with('error', 'グループの表示に失敗しました');
+    }
+}
 
     // URLパース用のヘルパーメソッド
     private function parseGitHubUrl($url)
