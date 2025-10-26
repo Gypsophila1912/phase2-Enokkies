@@ -77,7 +77,7 @@ Route::middleware('auth')->group(function () {
     // 🆕 タスク完了処理のルートを追加
     Route::patch('/tasks/{task}/complete', [TaskController::class, 'complete'])->name('tasks.complete');
 
-    // 🆕 キャラ設定画面への仮ルート（他メンバーが作成予定）
+    // 🆕 キャラ設定画面への仮ルート
     Route::get('/character/settings', function () {
         return Inertia::render('Character/Settings');
     })->name('character.settings');
