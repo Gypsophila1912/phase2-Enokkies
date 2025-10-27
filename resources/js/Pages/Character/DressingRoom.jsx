@@ -8,8 +8,22 @@ export default function DressingRoom({ auth }) {
     const [showClothes, setShowClothes] = useState(false);
     const [showBackgrounds, setShowBackgrounds] = useState(false);
     const [selectedBackground, setSelectedBackground] = useState("/dressings/room_background.png");
-    const [clothesOptions, setClothesOptions] = useState([]);
-    const [loadingClothes, setLoadingClothes] = useState(false);
+
+    // ✅ 最初から服が揃っている（固定データ）
+    const clothesOptions = [
+        { id: 1, name: "ベーシック", image_path: "/Enokkie/EnokkieImage.png" },
+        { id: 2, name: "エンジニア", image_path: "/dressings/en.png" },
+        { id: 3, name: "パンプキン", image_path: "/dressings/pumpkin.png" },
+        { id: 4, name: "ベイビー", image_path: "/dressings/baby.png" },
+        { id: 5, name: "スーパー", image_path: "/dressings/super.png" },
+    ];
+
+    const backgroundOptions = [
+        "/Room/CoolRoom.png",
+        "/Room/Fashionable.png",
+        "/Room/kiRoom.png",
+        "/Room/EnokkieRoom.png",
+    ];
 
     // ローカルストレージ復元
     useEffect(() => {
@@ -27,74 +41,15 @@ export default function DressingRoom({ auth }) {
         if (selectedImage) localStorage.setItem("selectedImage", selectedImage);
     }, [selectedImage]);
 
-    // グループの服取得
-    const fetchSelectedDressing = async () => {
-        try {
-            const res = await fetch(`/api/group/selected-dressing?group_id=${groupId}`);
-            if (res.ok) {
-                const data = await res.json();
-                if (data.selected_dressing?.image_path) {
-                    setSelectedImage(data.selected_dressing.image_path);
-                } else {
-                    setSelectedImage("/dressings/en.png");
-                }
-            }
-        } catch {
-            setSelectedImage("/dressings/pumpkin.png");
-        }
-    };
-
-    // 服一覧取得
-    const fetchClothes = async () => {
-        setLoadingClothes(true);
-        try {
-            const res = await fetch(`/api/shop/group-dressings?group_id=${groupId}`);
-            if (res.ok) {
-                const data = await res.json();
-                setClothesOptions(data.dressings || []);
-            }
-        } catch {
-            setClothesOptions([]);
-        }
-        setLoadingClothes(false);
-    };
-
-    useEffect(() => {
-        fetchSelectedDressing();
-        fetchClothes();
-
-        // ✅ FoodShopからのカスタムイベントを受け取って即再取得
-        const handleNewDressing = () => {
-            console.log("🎉 新しい服が購入されました！");
-            fetchClothes();
-        };
-
-        window.addEventListener("dressing-added", handleNewDressing);
-        return () => window.removeEventListener("dressing-added", handleNewDressing);
-    }, []);
-
     // 服選択
-    const handleSelectClothes = async (imgPath, dressingId) => {
+    const handleSelectClothes = async (imgPath) => {
         setSelectedImage(imgPath);
-        await fetch("/api/group/select-dressing", {
+        await fetch("/character/update-image", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ group_id: groupId, dressing_id: dressingId }),
+            body: JSON.stringify({ group_id: groupId, image_path: imgPath }),
         });
-        await fetchClothes();
     };
-
-    const handleShowClothes = () => {
-        if (!showClothes) fetchClothes();
-        setShowClothes(!showClothes);
-    };
-
-    const backgroundOptions = [
-        "/Room/CoolRoom.png",
-        "/Room/Fashionable.png",
-        "/Room/kiRoom.png",
-        "/Room/EnokkieRoom.png",
-    ];
 
     return (
         <AuthenticatedLayout user={auth.user}>
@@ -124,8 +79,9 @@ export default function DressingRoom({ auth }) {
                     className="w-60 h-60 object-contain rounded-full border-4 border-green-300 shadow-lg bg-white/80 backdrop-blur-md relative z-10"
                 />
 
+                {/* ボタン */}
                 <button
-                    onClick={handleShowClothes}
+                    onClick={() => setShowClothes(!showClothes)}
                     className="mt-6 bg-yellow-400 hover:bg-yellow-500 text-white font-bold py-2 px-6 rounded-full shadow-lg relative z-10"
                 >
                     {showClothes ? "服を隠す" : "服を選ぶ"}
@@ -138,32 +94,26 @@ export default function DressingRoom({ auth }) {
                     {showBackgrounds ? "とじる" : "お着替え部屋内装"}
                 </button>
 
+                {/* 服リスト */}
                 {showClothes && (
                     <div className="mt-6 flex flex-wrap justify-center gap-6 bg-white bg-opacity-90 rounded-xl p-4 shadow-lg border border-white/80 relative z-10">
-                        {loadingClothes ? (
-                            <div>読み込み中...</div>
-                        ) : clothesOptions.length === 0 ? (
-                            <div className="text-lg text-gray-600 font-bold">洋服を持ってないよ！</div>
-                        ) : (
-                            clothesOptions.map((item) => (
-                                <img
-                                    key={item.id || item.dressing_id}
-                                    src={item.image_path || item.path}
-                                    alt={item.name}
-                                    className={`w-28 h-28 rounded-lg cursor-pointer border-4 transition-transform duration-200 ${
-                                        selectedImage === (item.image_path || item.path)
-                                            ? "border-emerald-500 scale-105 shadow-[0_0_10px_2px_rgba(16,185,129,0.7)]"
-                                            : "border-transparent hover:border-green-400 hover:scale-110"
-                                    }`}
-                                    onClick={() =>
-                                        handleSelectClothes(item.image_path || item.path, item.id || item.dressing_id)
-                                    }
-                                />
-                            ))
-                        )}
+                        {clothesOptions.map((item) => (
+                            <img
+                                key={item.id}
+                                src={item.image_path}
+                                alt={item.name}
+                                className={`w-28 h-28 rounded-lg cursor-pointer border-4 transition-transform duration-200 ${
+                                    selectedImage === item.image_path
+                                        ? "border-emerald-500 scale-105 shadow-[0_0_10px_2px_rgba(16,185,129,0.7)]"
+                                        : "border-transparent hover:border-green-400 hover:scale-110"
+                                }`}
+                                onClick={() => handleSelectClothes(item.image_path)}
+                            />
+                        ))}
                     </div>
                 )}
 
+                {/* 背景リスト */}
                 {showBackgrounds && (
                     <div className="mt-6 flex flex-wrap justify-center gap-6 bg-white bg-opacity-90 rounded-xl p-4 shadow-lg border border-white/80 relative z-10">
                         {backgroundOptions.map((path, i) => (

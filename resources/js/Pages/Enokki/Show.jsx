@@ -112,7 +112,7 @@ export default function Show({ auth }) {
                             </Link>
                             <Link href={route("character.dressing-room")}>
                                 <button className="bg-pink-300 hover:bg-pink-400 text-white font-bold py-2 px-4 rounded-full shadow">
-                                    🎁 ごはんをあげる
+                                    👔 お着替え部屋
                                 </button>
                             </Link>
                         </div>
